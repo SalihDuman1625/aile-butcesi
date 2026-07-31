@@ -6,6 +6,7 @@ import Accounts from './components/Accounts';
 import BottomNav from './components/BottomNav';
 import TransactionForm from './components/TransactionForm';
 import Settings from './components/Settings';
+import ActivationGuard from './components/ActivationGuard';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -24,29 +25,31 @@ function App() {
 
   return (
     <BudgetProvider>
-      <div className="w-full h-full min-h-screen relative">
-        
-        <main className="w-full">
-          {activeTab === 'dashboard' && <Dashboard onEditTransaction={handleOpenForm} />}
-          {activeTab === 'accounts' && <Accounts />}
-          {activeTab === 'charts' && <Charts />}
-          {activeTab === 'settings' && <Settings />}
-        </main>
+      <ActivationGuard>
+        <div className="w-full h-full min-h-screen relative">
+          
+          <main className="w-full">
+            {activeTab === 'dashboard' && <Dashboard onEditTransaction={handleOpenForm} />}
+            {activeTab === 'accounts' && <Accounts />}
+            {activeTab === 'charts' && <Charts />}
+            {activeTab === 'settings' && <Settings />}
+          </main>
 
-        <BottomNav 
-          activeTab={activeTab} 
-          setActiveTab={setActiveTab} 
-          onOpenForm={() => handleOpenForm(null)}
-        />
-
-        {isFormOpen && (
-          <TransactionForm 
-            onClose={handleCloseForm} 
-            transactionToEdit={transactionToEdit}
+          <BottomNav 
+            activeTab={activeTab} 
+            setActiveTab={setActiveTab} 
+            onOpenForm={() => handleOpenForm(null)}
           />
-        )}
-        
-      </div>
+
+          {isFormOpen && (
+            <TransactionForm 
+              onClose={handleCloseForm} 
+              transactionToEdit={transactionToEdit}
+            />
+          )}
+          
+        </div>
+      </ActivationGuard>
     </BudgetProvider>
   );
 }
