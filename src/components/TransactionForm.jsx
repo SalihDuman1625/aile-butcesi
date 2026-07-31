@@ -11,7 +11,7 @@ const DEFAULT_CATEGORIES = {
 };
 
 const TransactionForm = ({ onClose, transactionToEdit }) => {
-  const { addTransaction, editTransaction, transactions, accounts } = useBudget();
+  const { addTransaction, editTransaction, transactions, accounts, addAccount } = useBudget();
   
   const [type, setType] = useState('expense');
   const [title, setTitle] = useState('');
@@ -25,6 +25,18 @@ const TransactionForm = ({ onClose, transactionToEdit }) => {
   
   const [accountId, setAccountId] = useState(''); // Source
   const [targetAccountId, setTargetAccountId] = useState(''); // Target (for transfer)
+
+  // Hızlı Hesap Ekleme State'leri
+  const [showQuickAccount, setShowQuickAccount] = useState(false);
+  const [quickAccountName, setQuickAccountName] = useState('');
+  const [quickAccountType, setQuickAccountType] = useState('bank');
+
+  const handleQuickAddAccount = () => {
+    if (!quickAccountName.trim()) return;
+    addAccount(quickAccountName, quickAccountType);
+    setQuickAccountName('');
+    setShowQuickAccount(false);
+  };
 
   const uniquePersons = useMemo(() => {
     return [...new Set(transactions.map(t => t.person).filter(p => p && p !== 'Ortak'))];
@@ -145,27 +157,62 @@ const TransactionForm = ({ onClose, transactionToEdit }) => {
             />
           </div>
 
-          {/* HESAP SEÇİMLERİ */}
-          <div className="form-group">
-            <label className="form-label">
-              {type === 'expense' ? 'Nereden Ödenecek?' : 
-               type === 'income' ? 'Nereye Gelecek?' :
-               type === 'transfer' ? 'Çıkış Yapılacak (Gönderen) Hesap' :
-               type === 'debt_given' ? 'Para Nereden Çıkacak?' : 'Para Hangi Hesaba Girecek?'}
-            </label>
-            <select 
-              value={accountId} 
-              onChange={e => setAccountId(e.target.value)} 
-              className="form-input"
-              required
-            >
-              {accounts.length === 0 && <option value="">Önce hesap ekleyin</option>}
-              {accounts.map(acc => (
-                <option key={acc.id} value={acc.id}>
-                  {acc.name} ({acc.type === 'bank' ? 'Banka' : acc.type === 'credit_card' ? 'Kredi Kartı' : acc.type === 'investment' ? 'Birikim' : 'Nakit'})
-                </option>
-              ))}
-            </select>
+          {/* HESAP SEÇİMLERİ & HIZLI EKLEME */}
+          <div className="form-group border border-border p-3 rounded-lg" style={{ backgroundColor: 'rgba(0,0,0,0.02)' }}>
+            <div className="flex justify-between items-center mb-2">
+              <label className="form-label mb-0" style={{ fontWeight: 'bold' }}>
+                {type === 'expense' ? 'Nereden Ödenecek?' : 
+                 type === 'income' ? 'Nereye Gelecek?' :
+                 type === 'transfer' ? 'Çıkış Yapılacak (Gönderen) Hesap' :
+                 type === 'debt_given' ? 'Para Nereden Çıkacak?' : 'Para Hangi Hesaba Girecek?'}
+              </label>
+              <button 
+                type="button" 
+                onClick={() => setShowQuickAccount(!showQuickAccount)}
+                className="text-xs font-bold text-primary flex items-center gap-1"
+                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                {showQuickAccount ? 'İptal' : '+ Yeni Hesap Ekle'}
+              </button>
+            </div>
+            
+            {showQuickAccount ? (
+              <div className="flex gap-2 items-center bg-white p-2 rounded border border-primary border-dashed">
+                <input 
+                  type="text" 
+                  placeholder="Hesap Adı (Örn: Ziraat)" 
+                  value={quickAccountName}
+                  onChange={e => setQuickAccountName(e.target.value)}
+                  className="form-input flex-1"
+                  style={{ padding: '0.4rem', fontSize: '0.9rem' }}
+                />
+                <select 
+                  value={quickAccountType} 
+                  onChange={e => setQuickAccountType(e.target.value)}
+                  className="form-input"
+                  style={{ padding: '0.4rem', fontSize: '0.9rem', width: 'auto' }}
+                >
+                  <option value="bank">Banka</option>
+                  <option value="cash">Nakit</option>
+                  <option value="credit_card">Kredi Kartı</option>
+                </select>
+                <button type="button" onClick={handleQuickAddAccount} className="btn btn-primary" style={{ padding: '0.4rem 0.8rem' }}>Ekle</button>
+              </div>
+            ) : (
+              <select 
+                value={accountId} 
+                onChange={e => setAccountId(e.target.value)} 
+                className="form-input"
+                required
+              >
+                {accounts.length === 0 && <option value="">Önce hesap ekleyin</option>}
+                {accounts.map(acc => (
+                  <option key={acc.id} value={acc.id}>
+                    {acc.name} ({acc.type === 'bank' ? 'Banka' : acc.type === 'credit_card' ? 'Kredi Kartı' : acc.type === 'investment' ? 'Birikim' : 'Nakit'})
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           {type === 'transfer' && (

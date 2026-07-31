@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, Key, Send } from 'lucide-react';
+import { Lock, Key, Send, User } from 'lucide-react';
 
 // Secret salt used for hashing (Never exposed to the user directly, only in JS bundle)
 const SECRET_SALT = "MALIORTAK_SALIH_2026_SECURE";
+const MASTER_PASSWORD = "PATRON"; // Kurucu şifresi
 
 // Simple hash function for offline activation
 export const generateLicenseCode = (deviceId) => {
@@ -20,6 +21,7 @@ const ActivationGuard = ({ children }) => {
   const [isLicensed, setIsLicensed] = useState(true); // Assume true until checked
   const [deviceId, setDeviceId] = useState('');
   const [inputCode, setInputCode] = useState('');
+  const [requesterName, setRequesterName] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -30,15 +32,7 @@ const ActivationGuard = ({ children }) => {
       return;
     }
 
-    // 2. Auto-license original creator (if they have existing users/transactions)
-    const existingUsers = localStorage.getItem('budget_users');
-    if (existingUsers && JSON.parse(existingUsers).length > 0) {
-      localStorage.setItem('app_licensed', 'true');
-      setIsLicensed(true);
-      return;
-    }
-
-    // 3. Needs license
+    // 2. Needs license
     setIsLicensed(false);
     
     // Generate or get Device ID
@@ -54,6 +48,13 @@ const ActivationGuard = ({ children }) => {
   const handleActivate = () => {
     if (!inputCode) return;
     
+    // Master Password Bypass for Admin
+    if (inputCode.trim().toUpperCase() === MASTER_PASSWORD.toUpperCase()) {
+      localStorage.setItem('app_licensed', 'true');
+      setIsLicensed(true);
+      return;
+    }
+
     const expectedCode = generateLicenseCode(deviceId);
     
     if (inputCode.trim().toUpperCase() === expectedCode) {
@@ -65,7 +66,12 @@ const ActivationGuard = ({ children }) => {
   };
 
   const handleSendWhatsApp = () => {
-    const text = `Merhaba, Aile Bütçesi uygulaması için lisans talep ediyorum.\n\nCihaz Kodum: *${deviceId}*\n\nUygulamayı kullanabilmem için bana bir aktivasyon kodu gönderebilir misin?`;
+    if (!requesterName.trim()) {
+      setError('Lütfen kodu göndermeden önce Adınızı ve Soyadınızı yazın.');
+      return;
+    }
+    setError('');
+    const text = `Merhaba, ben *${requesterName.trim()}*.\nAile Bütçesi uygulaması için lisans talep ediyorum.\n\nCihaz Kodum: *${deviceId}*\n\nUygulamayı kullanabilmem için bana bir aktivasyon kodu gönderebilir misin?`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -90,12 +96,29 @@ const ActivationGuard = ({ children }) => {
           <p className="text-2xl font-mono font-bold tracking-widest" style={{ color: 'var(--primary-color)' }}>{deviceId}</p>
         </div>
 
+        <div className="w-full h-px mb-6 relative" style={{ backgroundColor: 'var(--border-color)' }}>
+          <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-3 text-xs text-muted font-bold" style={{ background: 'var(--card-bg)' }}>LİSANS TALEBİ</span>
+        </div>
+
+        <div className="form-group w-full mb-4">
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted" size={18} />
+            <input
+              type="text"
+              value={requesterName}
+              onChange={(e) => { setRequesterName(e.target.value); setError(''); }}
+              placeholder="Adınız Soyadınız"
+              className="form-input w-full pl-10"
+            />
+          </div>
+        </div>
+
         <button 
           onClick={handleSendWhatsApp}
           className="btn flex items-center justify-center gap-2 mb-8 w-full"
           style={{ backgroundColor: '#25D366', color: 'white' }}
         >
-          <Send size={18} /> Kodu Yöneticiye Gönder
+          <Send size={18} /> Kodu WhatsApp'tan İste
         </button>
 
         <div className="w-full h-px mb-8 relative" style={{ backgroundColor: 'var(--border-color)' }}>
@@ -103,14 +126,13 @@ const ActivationGuard = ({ children }) => {
         </div>
 
         <div className="form-group w-full mb-4">
-          <label className="form-label text-left">Aktivasyon Kodu</label>
           <div className="relative">
             <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted" size={18} />
             <input
               type="text"
               value={inputCode}
               onChange={(e) => { setInputCode(e.target.value); setError(''); }}
-              placeholder="KOD-XXXXX"
+              placeholder="Aktivasyon Kodunu Girin"
               className="form-input w-full pl-10 uppercase font-mono"
             />
           </div>
