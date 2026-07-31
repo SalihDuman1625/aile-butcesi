@@ -268,13 +268,13 @@ const Settings = () => {
               <p className="text-xl font-mono font-bold tracking-widest text-green-600 mb-2">{generatedLicense}</p>
               <button 
                 onClick={() => {
-                  const text = `Aile Bütçesi uygulamasına hoş geldin!\n\nSenin için oluşturduğum aktivasyon kodun: *${generatedLicense}*`;
+                  const text = `Aile Bütçesi uygulamasına hoş geldin!\n\nSenin için oluşturduğum aktivasyon kodun: *${generatedLicense}*\n\nAşağıdaki sihirli linke tıklayarak uygulamayı anında açabilirsin:\nhttps://benim-butcem.netlify.app/?aktivasyon=${generatedLicense}`;
                   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                 }}
                 className="btn text-sm py-1 px-3 mx-auto flex items-center gap-1"
                 style={{ backgroundColor: '#25D366', color: 'white', width: 'fit-content' }}
               >
-                <Send size={14} /> WhatsApp ile Gönder
+                <Send size={14} /> WhatsApp ile Gönder (Linkli)
               </button>
             </div>
           )}

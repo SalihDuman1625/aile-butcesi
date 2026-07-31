@@ -43,6 +43,23 @@ const ActivationGuard = ({ children }) => {
     }
     setDeviceId(currentDeviceId);
 
+    // 3. Check Auto-Activation via Link (URL Param)
+    const params = new URLSearchParams(window.location.search);
+    const autoCode = params.get('aktivasyon');
+    if (autoCode) {
+      setInputCode(autoCode);
+      const expectedCode = generateLicenseCode(currentDeviceId);
+      if (autoCode.toUpperCase() === expectedCode || autoCode.toUpperCase() === MASTER_PASSWORD) {
+        localStorage.setItem('app_licensed', 'true');
+        setIsLicensed(true);
+        // Linkten parametreyi temizle (kötü görünmesin)
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return;
+      } else {
+        setError('Linkteki aktivasyon kodu geçersiz veya başka bir cihaza ait!');
+      }
+    }
+
   }, []);
 
   const handleActivate = () => {
