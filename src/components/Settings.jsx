@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useBudget } from '../context/BudgetContext';
-import { Moon, Sun, Users, UserPlus, ShieldAlert, Download, Trash2, CheckCircle2, Lock, Unlock } from 'lucide-react';
+import { Moon, Sun, Users, UserPlus, ShieldAlert, Download, Trash2, CheckCircle2, Lock, Unlock, Key, Send } from 'lucide-react';
+import { generateLicenseCode } from './ActivationGuard';
 
 const Settings = () => {
   const { 
@@ -21,8 +22,19 @@ const Settings = () => {
   const [pinError, setPinError] = useState(false);
 
   // Change PIN for current user
+  // Change PIN for current user
   const [newPinForCurrent, setNewPinForCurrent] = useState('');
   const [showChangePin, setShowChangePin] = useState(false);
+
+  // License Generator
+  const [licenseTargetId, setLicenseTargetId] = useState('');
+  const [generatedLicense, setGeneratedLicense] = useState('');
+
+  const handleGenerateLicense = () => {
+    if (!licenseTargetId) return;
+    const code = generateLicenseCode(licenseTargetId);
+    setGeneratedLicense(code);
+  };
 
   const handleAddUser = (e) => {
     e.preventDefault();
@@ -220,6 +232,54 @@ const Settings = () => {
           </>
         )}
       </div>
+
+      {/* LİSANS ÜRETİCİ (SADECE ADMİN) */}
+      {currentUser.role === 'admin' && (
+        <div className="card flex flex-col gap-4 border-2 border-primary border-opacity-30">
+          <h3 className="font-bold text-lg flex items-center gap-2 text-primary">
+            <Key size={20} /> Lisans Dağıtıcı (Keygen)
+          </h3>
+          <p className="text-sm text-muted">Uygulamayı kullanmak isteyen arkadaşlarınıza cihaz kodlarını sorup, buradan aktivasyon kodu üretebilirsiniz.</p>
+          
+          <div className="flex flex-col gap-2">
+            <input 
+              type="text"
+              placeholder="Arkadaşınızın Cihaz Kodunu (örn: ABC123XX) girin"
+              value={licenseTargetId}
+              onChange={(e) => {
+                setLicenseTargetId(e.target.value.toUpperCase());
+                setGeneratedLicense('');
+              }}
+              className="form-input uppercase font-mono tracking-widest"
+              maxLength={8}
+            />
+            <button 
+              onClick={handleGenerateLicense}
+              className="btn btn-primary"
+              disabled={!licenseTargetId || licenseTargetId.length < 5}
+            >
+              Lisans Kodu Üret
+            </button>
+          </div>
+
+          {generatedLicense && (
+            <div className="bg-green-50 border border-green-200 p-3 rounded-lg text-center mt-2" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)' }}>
+              <p className="text-xs text-muted mb-1">Üretilen Aktivasyon Kodu:</p>
+              <p className="text-xl font-mono font-bold tracking-widest text-green-600 mb-2">{generatedLicense}</p>
+              <button 
+                onClick={() => {
+                  const text = `Aile Bütçesi uygulamasına hoş geldin!\n\nSenin için oluşturduğum aktivasyon kodun: *${generatedLicense}*`;
+                  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                }}
+                className="btn text-sm py-1 px-3 mx-auto flex items-center gap-1"
+                style={{ backgroundColor: '#25D366', color: 'white', width: 'fit-content' }}
+              >
+                <Send size={14} /> WhatsApp ile Gönder
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 4. VERİ YÖNETİMİ */}
       <div className="card flex flex-col gap-4">
