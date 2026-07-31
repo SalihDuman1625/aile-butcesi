@@ -25,6 +25,31 @@ const ActivationGuard = ({ children }) => {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // 0. Check Auto-Activation via Link (URL Param) FIRST
+    const params = new URLSearchParams(window.location.search);
+    const autoCode = params.get('aktivasyon');
+    let currentDeviceId = localStorage.getItem('app_device_id');
+    
+    if (autoCode) {
+      if (!currentDeviceId) {
+        currentDeviceId = Math.random().toString(36).substring(2, 10).toUpperCase();
+        localStorage.setItem('app_device_id', currentDeviceId);
+      }
+      
+      const expectedCode = generateLicenseCode(currentDeviceId);
+      if (autoCode.toUpperCase() === expectedCode || autoCode.toUpperCase() === MASTER_PASSWORD) {
+        localStorage.setItem('app_licensed', 'true');
+        if (autoCode.toUpperCase() === MASTER_PASSWORD) {
+          localStorage.setItem('is_master_admin', 'true');
+        }
+        setIsLicensed(true);
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return; // Auto activated successfully
+      } else {
+        setError('Linkteki aktivasyon kodu geçersiz veya başka bir cihaza ait!');
+      }
+    }
+
     // 1. Check if already licensed
     const licensed = localStorage.getItem('app_licensed');
     if (licensed === 'true') {
@@ -36,38 +61,21 @@ const ActivationGuard = ({ children }) => {
     setIsLicensed(false);
     
     // Generate or get Device ID
-    let currentDeviceId = localStorage.getItem('app_device_id');
     if (!currentDeviceId) {
       currentDeviceId = Math.random().toString(36).substring(2, 10).toUpperCase();
       localStorage.setItem('app_device_id', currentDeviceId);
     }
     setDeviceId(currentDeviceId);
 
-    // 3. Check Auto-Activation via Link (URL Param)
-    const params = new URLSearchParams(window.location.search);
-    const autoCode = params.get('aktivasyon');
-    if (autoCode) {
-      setInputCode(autoCode);
-      const expectedCode = generateLicenseCode(currentDeviceId);
-      if (autoCode.toUpperCase() === expectedCode || autoCode.toUpperCase() === MASTER_PASSWORD) {
-        localStorage.setItem('app_licensed', 'true');
-        setIsLicensed(true);
-        // Linkten parametreyi temizle (kötü görünmesin)
-        window.history.replaceState({}, document.title, window.location.pathname);
-        return;
-      } else {
-        setError('Linkteki aktivasyon kodu geçersiz veya başka bir cihaza ait!');
-      }
-    }
-
   }, []);
 
   const handleActivate = () => {
     if (!inputCode) return;
     
-    // Master Password Bypass for Admin
+    // Master Password Bypass for Admin (Salih)
     if (inputCode.trim().toUpperCase() === MASTER_PASSWORD.toUpperCase()) {
       localStorage.setItem('app_licensed', 'true');
+      localStorage.setItem('is_master_admin', 'true'); // Sadece ana kurucuya keygen yetkisi ver
       setIsLicensed(true);
       return;
     }

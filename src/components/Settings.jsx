@@ -233,8 +233,8 @@ const Settings = () => {
         )}
       </div>
 
-      {/* LİSANS ÜRETİCİ (SADECE ADMİN) */}
-      {currentUser.role === 'admin' && (
+      {/* LİSANS ÜRETİCİ (SADECE ANA KURUCU) */}
+      {localStorage.getItem('is_master_admin') === 'true' && (
         <div className="card flex flex-col gap-4 border-2 border-primary border-opacity-30">
           <h3 className="font-bold text-lg flex items-center gap-2 text-primary">
             <Key size={20} /> Lisans Dağıtıcı (Keygen)
