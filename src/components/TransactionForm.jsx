@@ -189,18 +189,18 @@ const TransactionForm = ({ onClose, transactionToEdit }) => {
                   className="form-input w-full"
                   style={{ padding: '0.5rem', fontSize: '0.9rem' }}
                 />
-                <div className="flex gap-2 w-full">
+                <div className="grid grid-cols-3 gap-2 w-full">
                   <select 
                     value={quickAccountType} 
                     onChange={e => setQuickAccountType(e.target.value)}
-                    className="form-input flex-1"
+                    className="form-input col-span-2"
                     style={{ padding: '0.5rem', fontSize: '0.9rem' }}
                   >
                     <option value="bank">Banka</option>
                     <option value="cash">Nakit</option>
                     <option value="credit_card">Kredi Kartı</option>
                   </select>
-                  <button type="button" onClick={handleQuickAddAccount} className="btn btn-primary whitespace-nowrap" style={{ padding: '0.5rem 1rem' }}>Ekle</button>
+                  <button type="button" onClick={handleQuickAddAccount} className="btn btn-primary col-span-1 whitespace-nowrap" style={{ padding: '0.5rem 1rem' }}>Ekle</button>
                 </div>
               </div>
             ) : (
