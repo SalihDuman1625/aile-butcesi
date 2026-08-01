@@ -33,7 +33,7 @@ const TransactionForm = ({ onClose, transactionToEdit }) => {
 
   const handleQuickAddAccount = () => {
     if (!quickAccountName.trim()) return;
-    addAccount(quickAccountName, quickAccountType);
+    addAccount({ name: quickAccountName.trim(), type: quickAccountType, balance: 0 });
     setQuickAccountName('');
     setShowQuickAccount(false);
   };
