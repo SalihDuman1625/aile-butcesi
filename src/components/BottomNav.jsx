@@ -49,6 +49,18 @@ const BottomNav = ({ activeTab, setActiveTab, onOpenForm }) => {
         <span>Ayarlar</span>
       </button>
 
+      {/* Geliştirici Bilgisi */}
+      <div className="absolute bottom-1 left-0 w-full text-center">
+        <a 
+          href="https://wa.me/905464302228?text=Merhaba%20Salih%20Bey,%20Aile%20B%C3%BCt%C3%A7esi%20uygulamas%C4%B1%20hakk%C4%B1nda%20yaz%C4%B1yorum." 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-[9px] text-muted hover:text-primary opacity-60 hover:opacity-100 transition-opacity font-medium tracking-wider"
+        >
+          Geliştirici: Salih Duman • 0546 430 22 28
+        </a>
+      </div>
+
     </div>
   );
 };
