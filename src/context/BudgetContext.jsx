@@ -169,7 +169,7 @@ export const BudgetProvider = ({ children }) => {
 
   // Account Actions
   const addAccount = (acc) => {
-    setAccounts(prev => [...prev, { ...acc, id: uuidv4() }]);
+    setAccounts(prev => [...prev, { ...acc, id: acc.id || uuidv4() }]);
   };
   
   const editAccount = (id, updatedAcc) => {

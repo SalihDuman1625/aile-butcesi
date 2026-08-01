@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useBudget } from '../context/BudgetContext';
 import { X } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
 
 const DEFAULT_CATEGORIES = {
   expense: ['Mutfak', 'Fatura', 'Kira', 'Ulaşım', 'Sağlık', 'Eğitim', 'Eğlence', 'Giyim', 'Diğer'],
@@ -33,7 +34,9 @@ const TransactionForm = ({ onClose, transactionToEdit }) => {
 
   const handleQuickAddAccount = () => {
     if (!quickAccountName.trim()) return;
-    addAccount({ name: quickAccountName.trim(), type: quickAccountType, balance: 0 });
+    const newId = uuidv4();
+    addAccount({ id: newId, name: quickAccountName.trim(), type: quickAccountType, balance: 0 });
+    setAccountId(newId);
     setQuickAccountName('');
     setShowQuickAccount(false);
   };
@@ -177,26 +180,28 @@ const TransactionForm = ({ onClose, transactionToEdit }) => {
             </div>
             
             {showQuickAccount ? (
-              <div className="flex gap-2 items-center bg-white p-2 rounded border border-primary border-dashed">
+              <div className="flex flex-col gap-2 bg-white p-3 rounded border border-primary border-dashed">
                 <input 
                   type="text" 
-                  placeholder="Hesap Adı (Örn: Ziraat)" 
+                  placeholder="Yeni Hesap Adı (Örn: Ziraat)" 
                   value={quickAccountName}
                   onChange={e => setQuickAccountName(e.target.value)}
-                  className="form-input flex-1"
-                  style={{ padding: '0.4rem', fontSize: '0.9rem' }}
+                  className="form-input w-full"
+                  style={{ padding: '0.5rem', fontSize: '0.9rem' }}
                 />
-                <select 
-                  value={quickAccountType} 
-                  onChange={e => setQuickAccountType(e.target.value)}
-                  className="form-input"
-                  style={{ padding: '0.4rem', fontSize: '0.9rem', width: 'auto' }}
-                >
-                  <option value="bank">Banka</option>
-                  <option value="cash">Nakit</option>
-                  <option value="credit_card">Kredi Kartı</option>
-                </select>
-                <button type="button" onClick={handleQuickAddAccount} className="btn btn-primary" style={{ padding: '0.4rem 0.8rem' }}>Ekle</button>
+                <div className="flex gap-2 w-full">
+                  <select 
+                    value={quickAccountType} 
+                    onChange={e => setQuickAccountType(e.target.value)}
+                    className="form-input flex-1"
+                    style={{ padding: '0.5rem', fontSize: '0.9rem' }}
+                  >
+                    <option value="bank">Banka</option>
+                    <option value="cash">Nakit</option>
+                    <option value="credit_card">Kredi Kartı</option>
+                  </select>
+                  <button type="button" onClick={handleQuickAddAccount} className="btn btn-primary whitespace-nowrap" style={{ padding: '0.5rem 1rem' }}>Ekle</button>
+                </div>
               </div>
             ) : (
               <select 
