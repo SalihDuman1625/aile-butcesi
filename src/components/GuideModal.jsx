@@ -4,10 +4,10 @@ import { X, Book, PlusCircle, CreditCard, ArrowRightLeft, HandCoins, Users, Shie
 const GuideModal = ({ onClose }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-background w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-xl flex flex-col overflow-hidden border border-border">
+      <div className="w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-xl flex flex-col overflow-hidden" style={{ backgroundColor: 'var(--bg-color)', border: '1px solid var(--border-color)' }}>
         
         {/* Header */}
-        <div className="flex justify-between items-center p-4 border-b border-border bg-card">
+        <div className="flex justify-between items-center p-4 border-b" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-color)' }}>
           <h2 className="text-xl font-bold flex items-center gap-2 text-primary">
             <Book size={24} /> Kullanım Kılavuzu
           </h2>
@@ -83,7 +83,7 @@ const GuideModal = ({ onClose }) => {
         </div>
         
         {/* Footer */}
-        <div className="p-4 border-t border-border bg-card">
+        <div className="p-4 border-t" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-color)' }}>
           <button onClick={onClose} className="btn btn-primary w-full py-3 font-bold text-lg rounded-xl">
             Anladım, Kapat
           </button>
