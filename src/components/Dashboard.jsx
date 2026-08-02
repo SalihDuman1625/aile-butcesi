@@ -203,10 +203,7 @@ const Dashboard = ({ onEditTransaction }) => {
               <div className="flex items-center gap-3">
                 <AlertCircle className="text-danger" size={24} />
                 <div>
-                  <p className="font-bold text-danger text-sm">
-                    {bill.name} 
-                    {bill.isInstallment && <span className="text-xs ml-1 opacity-80">(Taksit {(bill.paidInstallments || 0) + 1}/{bill.totalInstallments})</span>}
-                  </p>
+                  <p className="font-bold text-danger text-sm">{bill.name}</p>
                   <p className="text-xs text-danger opacity-80">Son {bill.daysLeft} gün (Ayın {bill.dueDay}'i)</p>
                 </div>
               </div>

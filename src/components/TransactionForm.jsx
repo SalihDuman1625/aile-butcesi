@@ -12,7 +12,7 @@ const DEFAULT_CATEGORIES = {
 };
 
 const TransactionForm = ({ onClose, transactionToEdit }) => {
-  const { addTransaction, editTransaction, transactions, accounts, addAccount, addBill } = useBudget();
+  const { addTransaction, editTransaction, transactions, accounts, addAccount } = useBudget();
   
   const [type, setType] = useState('expense');
   const [title, setTitle] = useState('');
@@ -26,12 +26,6 @@ const TransactionForm = ({ onClose, transactionToEdit }) => {
   
   const [accountId, setAccountId] = useState(''); // Source
   const [targetAccountId, setTargetAccountId] = useState(''); // Target (for transfer)
-
-  // Taksit State'leri
-  const [isInstallment, setIsInstallment] = useState(false);
-  const [installmentCount, setInstallmentCount] = useState(2);
-  const [startingInstallment, setStartingInstallment] = useState(1);
-  const [amountType, setAmountType] = useState('total'); // 'total' veya 'monthly'
 
   // Hızlı Hesap Ekleme State'leri
   const [showQuickAccount, setShowQuickAccount] = useState(false);
@@ -73,7 +67,6 @@ const TransactionForm = ({ onClose, transactionToEdit }) => {
       setPerson(transactionToEdit.person === 'Ortak' ? '' : (transactionToEdit.person || ''));
       setAccountId(transactionToEdit.accountId || '');
       setTargetAccountId(transactionToEdit.targetAccountId || '');
-      setIsInstallment(false); // Düzenlemede taksit eklenmez
     } else {
       if (accounts.length > 0) {
         setAccountId(accounts[0].id);
@@ -91,60 +84,23 @@ const TransactionForm = ({ onClose, transactionToEdit }) => {
       return;
     }
 
-    const parsedAmount = parseFloat(amount);
-    
-    // Taksitli İşlem Kaydı
-    if (type === 'expense' && isInstallment && installmentCount > 1 && !transactionToEdit) {
-      const remainingInstallments = (parseInt(installmentCount) - parseInt(startingInstallment)) + 1;
-      const monthlyAmount = amountType === 'total' ? parsedAmount / remainingInstallments : parsedAmount;
-      
-      // İlk işlemi kaydet
-      const txData = {
-        type,
-        title: `${title} (Taksit ${startingInstallment}/${installmentCount})`,
-        amount: monthlyAmount,
-        category: category.trim() || DEFAULT_CATEGORIES[type][0],
-        date: new Date(date).toISOString(),
-        dueDate: dueDate ? new Date(dueDate).toISOString() : null,
-        accountType,
-        person: person.trim() || 'Ortak',
-        accountId,
-        targetAccountId: null
-      };
-      addTransaction(txData);
-      
-      // Kalan taksitleri fatura olarak kaydet
-      const billData = {
-        name: title,
-        category: category.trim() || DEFAULT_CATEGORIES[type][0],
-        dueDay: new Date(date).getDate(),
-        isFixed: true,
-        expectedAmount: monthlyAmount,
-        defaultAccountId: accountId,
-        isInstallment: true,
-        totalInstallments: parseInt(installmentCount),
-        paidInstallments: parseInt(startingInstallment)
-      };
-      addBill(billData);
-    } else {
-      const txData = {
-        type,
-        title,
-        amount: parsedAmount,
-        category: category.trim() || DEFAULT_CATEGORIES[type][0],
-        date: new Date(date).toISOString(),
-        dueDate: dueDate ? new Date(dueDate).toISOString() : null,
-        accountType,
-        person: person.trim() || 'Ortak',
-        accountId,
-        targetAccountId: type === 'transfer' ? targetAccountId : null
-      };
+    const txData = {
+      type,
+      title,
+      amount: parseFloat(amount),
+      category: category.trim() || DEFAULT_CATEGORIES[type][0],
+      date: new Date(date).toISOString(),
+      dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+      accountType,
+      person: person.trim() || 'Ortak', // Zorunluluk kalktı, boşsa Ortak
+      accountId,
+      targetAccountId: type === 'transfer' ? targetAccountId : null
+    };
 
-      if (transactionToEdit) {
-        editTransaction(transactionToEdit.id, txData);
-      } else {
-        addTransaction(txData);
-      }
+    if (transactionToEdit) {
+      editTransaction(transactionToEdit.id, txData);
+    } else {
+      addTransaction(txData);
     }
     
     onClose();
@@ -203,61 +159,6 @@ const TransactionForm = ({ onClose, transactionToEdit }) => {
               required
             />
           </div>
-
-          {type === 'expense' && !transactionToEdit && (
-            <div className="form-group p-3 rounded-lg" style={{ backgroundColor: '#F0F9FF', border: '1px solid #BAE6FD' }}>
-              <label className="flex items-center gap-2 font-bold mb-2 cursor-pointer text-primary">
-                <input 
-                  type="checkbox" 
-                  checked={isInstallment} 
-                  onChange={e => setIsInstallment(e.target.checked)} 
-                  style={{ width: '18px', height: '18px' }}
-                />
-                Bu Bir Taksitli İşlem / Kredi Ödemesi mi?
-              </label>
-              
-              {isInstallment && (
-                <div className="flex flex-col gap-3 mt-3">
-                  <div className="flex gap-4">
-                    <div style={{ flex: 1 }}>
-                      <label className="form-label text-xs">Toplam Taksit Sayısı</label>
-                      <input 
-                        type="number" 
-                        min="2" 
-                        max="360"
-                        value={installmentCount} 
-                        onChange={e => setInstallmentCount(e.target.value)}
-                        className="form-input"
-                      />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <label className="form-label text-xs">Bu Ödeme Kaçıncı Taksit?</label>
-                      <input 
-                        type="number" 
-                        min="1" 
-                        max={installmentCount}
-                        value={startingInstallment} 
-                        onChange={e => setStartingInstallment(e.target.value)}
-                        className="form-input"
-                      />
-                      <p className="text-[10px] text-muted mt-1">Eski krediyse bulunduğunuz taksiti yazın (Örn: 27)</p>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="form-label text-xs">Yukarıya Girdiğiniz Tutar Hangisi?</label>
-                    <select 
-                      value={amountType} 
-                      onChange={e => setAmountType(e.target.value)} 
-                      className="form-input"
-                    >
-                      <option value="total">Kalan Toplam Borç Tutarı (Kendisi Bölecek)</option>
-                      <option value="monthly">Sadece 1 Aylık Taksit Tutarı</option>
-                    </select>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
 
           {/* HESAP SEÇİMLERİ & HIZLI EKLEME */}
           <div className="form-group border border-border p-3 rounded-lg" style={{ backgroundColor: 'rgba(0,0,0,0.02)' }}>
