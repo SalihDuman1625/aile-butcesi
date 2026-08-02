@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useBudget } from '../context/BudgetContext';
-import { Moon, Sun, Users, UserPlus, ShieldAlert, Download, Trash2, CheckCircle2, Lock, Unlock, Key, Send } from 'lucide-react';
+import { Moon, Sun, Users, UserPlus, ShieldAlert, Download, Trash2, CheckCircle2, Lock, Unlock, Key, Send, BookOpen } from 'lucide-react';
 import { generateLicenseCode } from './ActivationGuard';
+import GuideModal from './GuideModal';
 
 const Settings = () => {
   const { 
@@ -29,6 +30,9 @@ const Settings = () => {
   // License Generator
   const [licenseTargetId, setLicenseTargetId] = useState('');
   const [generatedLicense, setGeneratedLicense] = useState('');
+
+  // Guide
+  const [showGuide, setShowGuide] = useState(false);
 
   const handleGenerateLicense = () => {
     if (!licenseTargetId) return;
@@ -98,7 +102,23 @@ const Settings = () => {
   };
 
   return (
-    <div className="flex flex-col gap-5 p-5 pb-32">
+    <div className="pb-24 slide-in p-4">
+      <button 
+        onClick={() => setShowGuide(true)} 
+        className="w-full mb-6 p-4 rounded-xl flex items-center justify-between text-white shadow-lg transition-transform hover:scale-[1.02]"
+        style={{ background: 'linear-gradient(135deg, var(--primary-color) 0%, #3B82F6 100%)' }}
+      >
+        <div className="flex items-center gap-3">
+          <BookOpen size={24} />
+          <div className="text-left">
+            <h3 className="font-bold text-lg leading-tight">Kullanım Kılavuzu</h3>
+            <p className="text-sm opacity-90">Uygulamanın nasıl çalıştığını öğrenin</p>
+          </div>
+        </div>
+        <span className="font-bold text-xl">→</span>
+      </button>
+
+      <div className="flex flex-col gap-6">
       
       <div className="mt-2 mb-2">
         <h2 className="text-2xl font-bold text-main">Ayarlar</h2>
@@ -233,8 +253,8 @@ const Settings = () => {
         )}
       </div>
 
-      {/* LİSANS ÜRETİCİ (SADECE ADMİN) */}
-      {currentUser.role === 'admin' && (
+      {/* LİSANS ÜRETİCİ (SADECE ANA KURUCU) */}
+      {localStorage.getItem('is_master_admin') === 'true' && (
         <div className="card flex flex-col gap-4 border-2 border-primary border-opacity-30">
           <h3 className="font-bold text-lg flex items-center gap-2 text-primary">
             <Key size={20} /> Lisans Dağıtıcı (Keygen)
@@ -268,13 +288,13 @@ const Settings = () => {
               <p className="text-xl font-mono font-bold tracking-widest text-green-600 mb-2">{generatedLicense}</p>
               <button 
                 onClick={() => {
-                  const text = `Aile Bütçesi uygulamasına hoş geldin!\n\nSenin için oluşturduğum aktivasyon kodun: *${generatedLicense}*`;
+                  const text = `Aile Bütçesi uygulamasına hoş geldin!\n\nSenin için oluşturduğum aktivasyon kodun: *${generatedLicense}*\n\nAşağıdaki sihirli linke tıklayarak uygulamayı anında açabilirsin:\nhttps://benim-butcem.netlify.app/?aktivasyon=${generatedLicense}`;
                   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                 }}
                 className="btn text-sm py-1 px-3 mx-auto flex items-center gap-1"
                 style={{ backgroundColor: '#25D366', color: 'white', width: 'fit-content' }}
               >
-                <Send size={14} /> WhatsApp ile Gönder
+                <Send size={14} /> WhatsApp ile Gönder (Linkli)
               </button>
             </div>
           )}
@@ -308,6 +328,8 @@ const Settings = () => {
             )}
           </div>
         )}
+      </div>
+
       </div>
 
       {/* PIN ENTRY MODAL */}
@@ -344,6 +366,7 @@ const Settings = () => {
         </div>
       )}
 
+      {showGuide && <GuideModal onClose={() => setShowGuide(false)} />}
     </div>
   );
 };

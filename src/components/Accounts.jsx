@@ -118,8 +118,11 @@ const Accounts = () => {
           {bills.map(b => (
             <div key={b.id} className="flex justify-between items-center p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-color)' }}>
               <div>
-                <p className="font-semibold">{b.name}</p>
-                <p className="text-xs text-muted">Ayın {b.dueDay}. Günü • {b.isFixed ? 'Sabit' : 'Değişken'}</p>
+                <p className="font-semibold">
+                  {b.name} 
+                  {b.isInstallment && <span className="text-xs ml-1 font-normal text-primary">(Kalan Taksit: {b.totalInstallments - (b.paidInstallments || 0)})</span>}
+                </p>
+                <p className="text-xs text-muted">Ayın {b.dueDay}. Günü • {b.isInstallment ? 'Taksit' : b.isFixed ? 'Sabit' : 'Değişken'}</p>
               </div>
               <div className="flex items-center gap-2">
                 {currentUser.role === 'admin' && (

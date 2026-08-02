@@ -169,7 +169,7 @@ export const BudgetProvider = ({ children }) => {
 
   // Account Actions
   const addAccount = (acc) => {
-    setAccounts(prev => [...prev, { ...acc, id: uuidv4() }]);
+    setAccounts(prev => [...prev, { ...acc, id: acc.id || uuidv4() }]);
   };
   
   const editAccount = (id, updatedAcc) => {
@@ -185,21 +185,44 @@ export const BudgetProvider = ({ children }) => {
   const editBill = (id, updated) => setBills(prev => prev.map(b => (b.id === id ? { ...b, ...updated } : b)));
   const deleteBill = (id) => setBills(prev => prev.filter(b => b.id !== id));
 
-  const markBillAsPaid = (billId, amount, accountId) => {
+  const markBillAsPaid = (billId, amount, accountId, customTitle) => {
     const bill = bills.find(b => b.id === billId);
     if (!bill) return;
 
+    let finalTitle = customTitle || `${bill.name} Ödemesi`;
+
+    if (bill.isInstallment) {
+      const nextInstallment = (bill.paidInstallments || 0) + 1;
+      if (!customTitle || customTitle === `${bill.name} Ödemesi`) {
+        finalTitle = `${bill.name} (Taksit ${nextInstallment}/${bill.totalInstallments})`;
+      }
+    }
+
     addTransaction({
       type: 'expense',
-      title: `${bill.name} Ödemesi`,
+      title: finalTitle,
       amount: parseFloat(amount),
-      category: 'Fatura',
+      category: bill.category || 'Fatura',
       date: new Date().toISOString(),
       accountType: 'Ev',
       accountId: accountId
     });
 
     const today = new Date();
+
+    if (bill.isInstallment) {
+      const newPaid = (bill.paidInstallments || 0) + 1;
+      if (newPaid >= bill.totalInstallments) {
+        deleteBill(bill.id);
+        return;
+      } else {
+        setBills(prev => prev.map(b => 
+          b.id === billId ? { ...b, paidInstallments: newPaid, lastPaidMonth: today.getMonth(), lastPaidYear: today.getFullYear() } : b
+        ));
+        return;
+      }
+    }
+
     setBills(prev => prev.map(b => 
       b.id === billId ? { ...b, lastPaidMonth: today.getMonth(), lastPaidYear: today.getFullYear() } : b
     ));
@@ -220,20 +243,24 @@ export const BudgetProvider = ({ children }) => {
     }).map(b => ({ ...b, daysLeft: parseInt(b.dueDay) - currentDay }));
   };
 
-  const getForecastForNextMonth = () => {
-    const fixedExpenses = bills.filter(b => b.isFixed).reduce((sum, b) => sum + parseFloat(b.amount || 0), 0);
-    const variableBills = bills.filter(b => !b.isFixed);
-    
-    let totalVariableEstimate = 0;
-    variableBills.forEach(b => {
-      const pastPayments = transactions.filter(t => t.category === 'Fatura' && t.title.includes(b.name));
-      if (pastPayments.length > 0) {
-        const avg = pastPayments.reduce((s, p) => s + p.amount, 0) / pastPayments.length;
-        totalVariableEstimate += avg;
-      }
-    });
+  const getEstimatedBillAmount = (bill) => {
+    if (bill.isFixed) {
+      return parseFloat(bill.expectedAmount || 0);
+    }
+    // Değişken faturalar için geçmiş ortalama hesapla
+    const pastPayments = transactions.filter(t => t.title && t.title.includes(bill.name));
+    if (pastPayments.length > 0) {
+      return pastPayments.reduce((s, p) => s + parseFloat(p.amount || 0), 0) / pastPayments.length;
+    }
+    return 0;
+  };
 
-    return fixedExpenses + totalVariableEstimate;
+  const getForecastForNextMonth = () => {
+    let totalEstimate = 0;
+    bills.forEach(b => {
+      totalEstimate += getEstimatedBillAmount(b);
+    });
+    return totalEstimate;
   };
 
   const getAccountBalances = () => {
@@ -323,6 +350,7 @@ export const BudgetProvider = ({ children }) => {
       deleteBill,
       markBillAsPaid,
       getUpcomingBills,
+      getEstimatedBillAmount,
       getForecastForNextMonth,
       getAccountBalances,
       getDebts,

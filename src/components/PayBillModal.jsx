@@ -3,14 +3,17 @@ import { X } from 'lucide-react';
 import { useBudget } from '../context/BudgetContext';
 
 const PayBillModal = ({ bill, onClose }) => {
-  const { accounts, markBillAsPaid } = useBudget();
+  const { accounts, markBillAsPaid, getEstimatedBillAmount } = useBudget();
   const [amount, setAmount] = useState('');
   const [accountId, setAccountId] = useState('');
   const [description, setDescription] = useState('');
+  const [estimatedAmount, setEstimatedAmount] = useState(0);
 
   useEffect(() => {
     if (bill) {
-      setAmount(bill.estimatedAmount ? bill.estimatedAmount.toFixed(2) : '');
+      const est = getEstimatedBillAmount(bill);
+      setEstimatedAmount(est);
+      setAmount(est > 0 ? est.toFixed(2) : '');
       setAccountId(bill.defaultAccountId || (accounts.length > 0 ? accounts[0].id : ''));
       setDescription(`${bill.name} Ödemesi`);
     }
@@ -20,16 +23,7 @@ const PayBillModal = ({ bill, onClose }) => {
     e.preventDefault();
     if (!amount || !accountId) return;
 
-    markBillAsPaid(bill.id, {
-      type: 'expense',
-      title: description,
-      amount: parseFloat(amount),
-      category: bill.category,
-      date: new Date().toISOString(),
-      accountType: 'Ev',
-      person: 'Sistem',
-      accountId: accountId
-    });
+    markBillAsPaid(bill.id, amount, accountId, description);
 
     onClose();
   };
@@ -50,7 +44,7 @@ const PayBillModal = ({ bill, onClose }) => {
           
           <div className="p-3 rounded-lg text-center" style={{ backgroundColor: 'var(--bg-color)' }}>
             <p className="font-bold text-lg">{bill.name}</p>
-            <p className="text-xs text-muted">Tahmini veya Sabit Tutar: {new Intl.NumberFormat('tr-TR', {style:'currency', currency:'TRY'}).format(bill.estimatedAmount || 0)}</p>
+            <p className="text-xs text-muted">Tahmini veya Sabit Tutar: {new Intl.NumberFormat('tr-TR', {style:'currency', currency:'TRY'}).format(estimatedAmount)}</p>
           </div>
 
           <div className="form-group">
