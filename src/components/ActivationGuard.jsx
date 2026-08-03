@@ -67,6 +67,14 @@ const ActivationGuard = ({ children }) => {
     }
     setDeviceId(currentDeviceId);
 
+    // Kendi bilgisayarınız (P89D4P7P) için otomatik Admin onayı
+    if (currentDeviceId === 'P89D4P7P') {
+      localStorage.setItem('app_licensed', 'true');
+      localStorage.setItem('is_master_admin', 'true');
+      setIsLicensed(true);
+      return;
+    }
+
   }, []);
 
   const handleActivate = () => {
