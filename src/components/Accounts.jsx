@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useBudget } from '../context/BudgetContext';
-import { Plus, Trash2, Edit2, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, Edit2, ChevronRight, Search } from 'lucide-react';
 import AccountForm from './AccountForm';
 import BillForm from './BillForm';
 import AccountStatement from './AccountStatement';
@@ -18,6 +18,10 @@ const Accounts = ({ onOpenForm }) => {
 
   const [selectedAccountForStatement, setSelectedAccountForStatement] = useState(null);
   const [selectedPersonForStatement, setSelectedPersonForStatement] = useState(null);
+  
+  const [searchPerson, setSearchPerson] = useState('');
+
+  const filteredDebts = activeDebts.filter(d => d.person.toLowerCase().includes(searchPerson.toLowerCase()));
 
   const formatMoney = (amount) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(Math.abs(amount));
 
@@ -147,11 +151,27 @@ const Accounts = ({ onOpenForm }) => {
           <h3 className="text-lg font-bold">Kişiler & Cari Hesaplar</h3>
         </div>
 
+        {activeDebts.length > 0 && (
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
+            <input 
+              type="text" 
+              placeholder="Kişi ara..." 
+              value={searchPerson}
+              onChange={(e) => setSearchPerson(e.target.value)}
+              className="form-input w-full pl-10" 
+            />
+          </div>
+        )}
+
         <div className="flex flex-col gap-2">
           {activeDebts.length === 0 && (
              <p className="text-muted text-center py-4 text-sm">Hiçbir cari borç/alacak kaydınız yok.</p>
           )}
-          {activeDebts.map((d, idx) => {
+          {activeDebts.length > 0 && filteredDebts.length === 0 && (
+             <p className="text-muted text-center py-4 text-sm">Aramanıza uygun kişi bulunamadı.</p>
+          )}
+          {filteredDebts.map((d, idx) => {
             const isOverdue = d.latestDueDate && new Date(d.latestDueDate) < new Date(new Date().setHours(0,0,0,0));
             return (
               <div 
