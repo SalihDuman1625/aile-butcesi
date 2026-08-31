@@ -5,12 +5,29 @@ import { v4 as uuidv4 } from 'uuid';
 
 const DEFAULT_CATEGORIES = {
   expense: ['Mutfak', 'Fatura', 'Kira', 'Ulaşım', 'Sağlık', 'Eğitim', 'Eğlence', 'Giyim', 'Diğer'],
-  income: ['Maaş', 'Prim', 'Yatırım Getirisi', 'Kira Geliri', 'Diğer'],
+  income: ['Maaş', 'Diğer'],
   transfer: ['Transfer / Virman'],
   debt_given: ['Borç Verildi'],
   debt_taken: ['Borç Alındı'],
-  debt_collection: ['Borç Tahsilatı'],
-  debt_payment: ['Borç Ödemesi']
+  debt_collection: ['Borç Tahsilatı (Bana Ödendi)'],
+  debt_payment: ['Borç Ödemesi (Ben Ödedim)']
+};
+
+const formatAmountDisplay = (val) => {
+  if (val === null || val === undefined) return '';
+  let str = val.toString();
+  // Remove all non-numeric characters except comma
+  str = str.replace(/[^0-9,]/g, '');
+  const parts = str.split(',');
+  if (parts.length > 2) {
+    str = parts[0] + ',' + parts.slice(1).join('');
+  }
+  const parts2 = str.split(',');
+  if (parts2[0]) {
+    parts2[0] = parts2[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    str = parts2.join(',');
+  }
+  return str;
 };
 
 const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
@@ -66,7 +83,7 @@ const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
     if (transactionToEdit) {
       setType(transactionToEdit.type);
       setTitle(transactionToEdit.title);
-      setAmount(transactionToEdit.amount);
+      setAmount(formatAmountDisplay(transactionToEdit.amount.toString().replace('.', ',')));
       setCategory(transactionToEdit.category);
       setDate(transactionToEdit.date.split('T')[0]);
       if (transactionToEdit.dueDate) setDueDate(transactionToEdit.dueDate.split('T')[0]);
@@ -103,7 +120,7 @@ const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
       return;
     }
 
-    const parsedAmount = parseFloat(amount);
+    const parsedAmount = parseFloat(amount.toString().replace(/\./g, '').replace(',', '.'));
     
     // Taksitli İşlem Kaydı
     if (type === 'expense' && isInstallment && installmentCount > 1 && !transactionToEdit) {
@@ -207,14 +224,14 @@ const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
             </select>
           </div>
 
-          <div className="form-group">
+          <div className="form-group mb-4">
             <label className="form-label">Tutar (₺)</label>
             <input 
-              type="number" 
-              placeholder="0.00" 
-              step="0.01"
+              type="text" 
+              inputMode="decimal"
+              placeholder="0,00" 
               value={amount} 
-              onChange={e => setAmount(e.target.value)}
+              onChange={e => setAmount(formatAmountDisplay(e.target.value))}
               className="form-input text-lg font-bold"
               style={{ fontSize: '1.25rem' }}
               autoFocus
