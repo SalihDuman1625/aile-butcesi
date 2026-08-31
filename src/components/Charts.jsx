@@ -144,10 +144,19 @@ const Charts = ({ onOpenForm }) => {
           </select>
         </div>
 
-        <div className="flex gap-2">
-          <select value={person} onChange={e => setPerson(e.target.value)} className="form-input flex-1" style={{ padding: '0.4rem', fontSize: '0.875rem' }}>
-            {uniquePersons.map(p => <option key={p} value={p}>{p === 'Tümü' ? 'Tüm Kişiler' : p}</option>)}
-          </select>
+        <div className="flex gap-2 relative">
+          <input 
+            type="text"
+            list="reports-persons"
+            value={person === 'Tümü' ? '' : person}
+            onChange={e => setPerson(e.target.value === '' ? 'Tümü' : e.target.value)}
+            placeholder="Tüm Kişiler (Kişi Ara)"
+            className="form-input flex-1" 
+            style={{ padding: '0.4rem', fontSize: '0.875rem' }}
+          />
+          <datalist id="reports-persons">
+            {uniquePersons.filter(p => p !== 'Tümü').map(p => <option key={p} value={p} />)}
+          </datalist>
           
           <select value={category} onChange={e => setCategory(e.target.value)} className="form-input flex-1" style={{ padding: '0.4rem', fontSize: '0.875rem' }}>
             {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
