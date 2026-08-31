@@ -34,7 +34,7 @@ function App() {
           <main className="w-full">
             {activeTab === 'dashboard' && <Dashboard onEditTransaction={handleOpenForm} />}
             {activeTab === 'accounts' && <Accounts onOpenForm={handleOpenForm} />}
-            {activeTab === 'charts' && <Charts />}
+            {activeTab === 'charts' && <Charts onOpenForm={handleOpenForm} />}
             {activeTab === 'settings' && <Settings />}
           </main>
 

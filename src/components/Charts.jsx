@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
 import { useBudget } from '../context/BudgetContext';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { Share2, Filter, SearchX } from 'lucide-react';
+import { Share2, Filter, SearchX, FileText } from 'lucide-react';
+import PersonStatement from './PersonStatement';
 
 const COLORS = ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316', '#64748B'];
 
 const CATEGORIES = ['Tümü', 'Mutfak', 'Fatura', 'Kira', 'Ulaşım', 'Sağlık', 'Eğitim', 'Eğlence', 'Giyim', 'Diğer', 'Maaş', 'Transfer / Virman', 'Borç Verildi', 'Borç Alındı'];
 
-const Charts = () => {
-  const { transactions, getFilteredTransactions } = useBudget();
+const Charts = ({ onOpenForm }) => {
+  const { transactions, getFilteredTransactions, getDebts } = useBudget();
   
   const [dateRange, setDateRange] = useState('Bu Ay');
   const [category, setCategory] = useState('Tümü');
   const [person, setPerson] = useState('Tümü');
   const [type, setType] = useState('all');
+
+  const [selectedPersonForStatement, setSelectedPersonForStatement] = useState(null);
 
   const uniquePersons = ['Tümü', ...new Set(transactions.map(t => t.person).filter(Boolean))];
 
@@ -83,6 +86,14 @@ const Charts = () => {
     window.print();
   };
 
+  const handleOpenStatement = () => {
+    if (person !== 'Tümü') {
+      const activeDebts = getDebts();
+      const debtProfile = activeDebts.find(d => d.person === person);
+      setSelectedPersonForStatement(debtProfile || { person, netAmount: 0, latestDueDate: null, transactions: [] });
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4 p-5 pb-32 print-container">
       <div className="mt-2 mb-2 flex justify-between items-center hide-on-print">
@@ -103,6 +114,12 @@ const Charts = () => {
           <Share2 size={14} /> WhatsApp
         </button>
       </div>
+
+      {person !== 'Tümü' && (
+        <button onClick={handleOpenStatement} className="btn w-full flex items-center justify-center gap-2 mb-2 hide-on-print" style={{ padding: '0.6rem', backgroundColor: 'var(--primary-color)', color: 'white', fontSize: '0.9rem' }}>
+          <FileText size={16} /> Bu Kişinin Cari Ekstresini Görüntüle
+        </button>
+      )}
 
       {/* Filter Bar */}
       <div className="card flex flex-col gap-3" style={{ border: 'none', backgroundColor: 'var(--bg-color)' }}>
@@ -253,6 +270,14 @@ const Charts = () => {
             </table>
           </div>
         </>
+      )}
+
+      {selectedPersonForStatement && (
+        <PersonStatement 
+          personData={selectedPersonForStatement} 
+          onClose={() => setSelectedPersonForStatement(null)} 
+          onOpenForm={onOpenForm}
+        />
       )}
     </div>
   );
