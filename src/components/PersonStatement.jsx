@@ -154,8 +154,30 @@ const PersonStatement = ({ personData, onClose, onOpenForm }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose} style={{ zIndex: 100 }}>
-      <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px', width: '95%' }}>
+    <div 
+      className="modal-overlay" 
+      onClick={onClose} 
+      style={{ 
+        zIndex: 100, 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        maxWidth: '100%',
+        left: 0,
+        transform: 'none',
+        padding: '20px'
+      }}
+    >
+      <div 
+        className="modal-content" 
+        onClick={e => e.stopPropagation()} 
+        style={{ 
+          maxWidth: '700px', 
+          width: '100%', 
+          borderRadius: '24px', 
+          maxHeight: '90vh', 
+          overflowY: 'auto' 
+        }}
+      >
         <div className="flex justify-between items-start mb-6 border-b border-[var(--border-color)] pb-4">
           <div>
             <h2 className="text-2xl font-bold text-main">{personData.person} <span className="text-sm font-normal text-muted">- Cari Ekstre</span></h2>
