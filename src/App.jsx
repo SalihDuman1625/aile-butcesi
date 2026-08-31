@@ -32,7 +32,7 @@ function App() {
         <div className="w-full h-full min-h-screen relative">
           
           <main className="w-full">
-            {activeTab === 'dashboard' && <Dashboard onEditTransaction={handleOpenForm} />}
+            {activeTab === 'dashboard' && <Dashboard onEditTransaction={handleOpenForm} onViewAll={() => setActiveTab('charts')} />}
             {activeTab === 'accounts' && <Accounts onOpenForm={handleOpenForm} />}
             {activeTab === 'charts' && <Charts onOpenForm={handleOpenForm} />}
             {activeTab === 'settings' && <Settings />}

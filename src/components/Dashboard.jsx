@@ -25,7 +25,7 @@ const getCategoryIcon = (category, type) => {
   }
 };
 
-const Dashboard = ({ onEditTransaction }) => {
+const Dashboard = ({ onEditTransaction, onViewAll }) => {
   const { transactions, accounts, getAccountBalances, getUpcomingBills, getForecastForNextMonth, getDebts, deleteTransaction, users, currentUser } = useBudget();
   const { totalCashAndBank, totalCCDebt, totalInvestments, netWorth } = getAccountBalances();
   const upcomingBills = getUpcomingBills();
@@ -241,7 +241,7 @@ const Dashboard = ({ onEditTransaction }) => {
       <div className="mt-4 mb-8">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold text-main">Son İşlemler</h3>
-          <button style={{ background: 'none', border: 'none', color: 'var(--primary-color)', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer' }}>Tümü</button>
+          <button onClick={onViewAll} style={{ background: 'none', border: 'none', color: 'var(--primary-color)', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer' }}>Tümü (Detaylı)</button>
         </div>
         
         {recentTransactions.length === 0 ? (
