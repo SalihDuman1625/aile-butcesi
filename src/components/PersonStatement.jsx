@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useBudget } from '../context/BudgetContext';
-import { X, ArrowUpCircle, ArrowDownCircle, Info, Calendar } from 'lucide-react';
+import { X, ArrowUpCircle, ArrowDownCircle, Printer, Download, Calendar } from 'lucide-react';
 
 const PersonStatement = ({ personData, onClose, onOpenForm }) => {
   const { transactions } = useBudget();
@@ -35,6 +35,122 @@ const PersonStatement = ({ personData, onClose, onOpenForm }) => {
     // Borçluyuz, ödeme yapıyoruz
     onOpenForm(null, { type: 'debt_payment', person: personData.person });
     onClose();
+  };
+
+  const handleExportCSV = () => {
+    let csv = "Tarih,Islem Turu,Aciklama,Tutar,Vade Tarihi\n";
+    accountTransactions.forEach(t => {
+      let typeLabel = '';
+      let isPositive = false;
+      if (t.type === 'debt_given') { typeLabel = 'Borc Verildi'; isPositive = true; }
+      else if (t.type === 'debt_taken') { typeLabel = 'Borc Alindi'; isPositive = false; }
+      else if (t.type === 'debt_collection') { typeLabel = 'Tahsilat'; isPositive = false; }
+      else if (t.type === 'debt_payment') { typeLabel = 'Odeme Yapildi'; isPositive = true; }
+      else if (t.type === 'expense') { typeLabel = 'Gider'; isPositive = false; }
+      else if (t.type === 'income') { typeLabel = 'Gelir'; isPositive = true; }
+
+      const date = new Date(t.date).toLocaleDateString('tr-TR');
+      const dueDate = t.dueDate ? new Date(t.dueDate).toLocaleDateString('tr-TR') : '';
+      const amountStr = (isPositive ? '+' : '-') + Math.abs(t.amount).toString();
+      
+      const safeTitle = `"${(t.title || '').replace(/"/g, '""')}"`;
+      
+      csv += `${date},${typeLabel},${safeTitle},${amountStr},${dueDate}\n`;
+    });
+
+    const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${personData.person}_Cari_Ekstre.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handlePrint = () => {
+    const printWindow = window.open('', '', 'height=600,width=800');
+    let html = `
+      <html>
+        <head>
+          <title>${personData.person} - Cari Ekstre</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+            h2 { color: #2563eb; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f3f4f6; }
+            .positive { color: #16a34a; font-weight: bold; }
+            .negative { color: #dc2626; font-weight: bold; }
+            .summary { margin-top: 20px; font-size: 1.2rem; font-weight: bold; padding: 15px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; }
+          </style>
+        </head>
+        <body>
+          <h2>${personData.person} - Cari Hesap Ekstresi</h2>
+          
+          <div class="summary">
+            Güncel Bakiye: <span class="${personData.netAmount > 0 ? 'positive' : 'negative'}">
+              ${personData.netAmount > 0 ? '+' : '-'}${formatMoney(personData.netAmount)}
+            </span> 
+            (${personData.netAmount > 0 ? 'Alacağımız Var' : 'Borcumuz Var'})
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Tarih</th>
+                <th>İşlem Türü</th>
+                <th>Açıklama</th>
+                <th>Tutar</th>
+                <th>Vade</th>
+              </tr>
+            </thead>
+            <tbody>
+    `;
+
+    accountTransactions.forEach(t => {
+      let typeLabel = '';
+      let isPositive = false;
+      if (t.type === 'debt_given') { typeLabel = 'Borç Verildi'; isPositive = true; }
+      else if (t.type === 'debt_taken') { typeLabel = 'Borç Alındı'; isPositive = false; }
+      else if (t.type === 'debt_collection') { typeLabel = 'Tahsilat'; isPositive = false; }
+      else if (t.type === 'debt_payment') { typeLabel = 'Ödeme Yapıldı'; isPositive = true; }
+      else if (t.type === 'expense') { typeLabel = 'Gider'; isPositive = false; }
+      else if (t.type === 'income') { typeLabel = 'Gelir'; isPositive = true; }
+
+      const date = new Date(t.date).toLocaleDateString('tr-TR');
+      const dueDate = t.dueDate ? new Date(t.dueDate).toLocaleDateString('tr-TR') : '-';
+      const amountHtml = `<span class="${isPositive ? 'positive' : 'negative'}">${isPositive ? '+' : '-'}${formatMoney(t.amount)}</span>`;
+
+      html += `
+        <tr>
+          <td>${date}</td>
+          <td>${typeLabel}</td>
+          <td>${t.title}</td>
+          <td>${amountHtml}</td>
+          <td>${dueDate}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+            </tbody>
+          </table>
+          <p style="margin-top: 30px; font-size: 0.8rem; color: #6b7280; text-align: center;">
+            Bu belge Aile Bütçesi uygulaması tarafından oluşturulmuştur. 
+            Oluşturulma Tarihi: ${new Date().toLocaleString('tr-TR')}
+          </p>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
   };
 
   return (
@@ -80,6 +196,23 @@ const PersonStatement = ({ personData, onClose, onOpenForm }) => {
             style={{ backgroundColor: '#ef4444' }} // Kırmızı
           >
             <ArrowUpCircle size={18} /> Ödeme Yap
+          </button>
+        </div>
+
+        <div className="flex gap-2 mb-4">
+          <button 
+            onClick={handleExportCSV}
+            className="flex-1 py-2 px-3 flex items-center justify-center gap-2 rounded-lg font-bold transition-colors"
+            style={{ backgroundColor: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'var(--text-color)' }}
+          >
+            <Download size={16} /> Excel (CSV)
+          </button>
+          <button 
+            onClick={handlePrint}
+            className="flex-1 py-2 px-3 flex items-center justify-center gap-2 rounded-lg font-bold transition-colors"
+            style={{ backgroundColor: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'var(--text-color)' }}
+          >
+            <Printer size={16} /> PDF / Yazdır
           </button>
         </div>
 
