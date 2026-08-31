@@ -3,6 +3,7 @@ import { useBudget } from '../context/BudgetContext';
 import { ShoppingBag, Coffee, Home, Zap, Heart, Book, Film, MoreHorizontal, Briefcase, TrendingUp, DollarSign, AlertCircle, CheckCircle2, Trash2, Edit2, ArrowRightLeft, HandCoins, Building, CreditCard, Coins, X, Landmark, Handshake } from 'lucide-react';
 import PayBillModal from './PayBillModal';
 import AccountStatement from './AccountStatement';
+import PersonStatement from './PersonStatement';
 
 const getCategoryIcon = (category, type) => {
   if (type === 'transfer') return <ArrowRightLeft size={20} />;
@@ -36,6 +37,7 @@ const Dashboard = ({ onEditTransaction }) => {
   // Widget Detail State
   const [activeWidget, setActiveWidget] = useState(null);
   const [selectedAccountForStatement, setSelectedAccountForStatement] = useState(null);
+  const [selectedPersonForStatement, setSelectedPersonForStatement] = useState(null);
 
   const formatMoney = (amount) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount);
 
@@ -85,17 +87,21 @@ const Dashboard = ({ onEditTransaction }) => {
               listData.map((item, idx) => (
                 <div 
                   key={item.id || idx} 
-                  className={`card p-3 flex justify-between items-center ${isAccountList ? 'cursor-pointer hover:border-[var(--primary-color)]' : ''}`}
-                  style={{ border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)' }}
+                  className="card p-3 flex justify-between items-center cursor-pointer transition-colors"
+                  style={{ border: '1px solid transparent', backgroundColor: 'var(--bg-color)' }}
+                  onMouseOver={e => e.currentTarget.style.borderColor = 'var(--primary-color)'}
+                  onMouseOut={e => e.currentTarget.style.borderColor = 'transparent'}
                   onClick={() => {
+                    setActiveWidget(null);
                     if (isAccountList) {
-                      setActiveWidget(null);
                       setSelectedAccountForStatement(item);
+                    } else {
+                      setSelectedPersonForStatement(item);
                     }
                   }}
                 >
                   <div>
-                    <p className="font-bold text-main">{isAccountList ? item.name : item.person}</p>
+                    <p className="font-bold text-main flex items-center gap-1">{isAccountList ? item.name : item.person} <ArrowRightLeft size={12} className="text-muted opacity-50" /></p>
                     {isAccountList && item.type === 'investment' && item.assetType !== 'TL' && (
                       <p className="text-xs text-primary font-semibold mt-1">
                         {item.assetAmount} {item.assetType} (Birim: {formatMoney(item.assetRate)})
@@ -114,9 +120,7 @@ const Dashboard = ({ onEditTransaction }) => {
               ))
             )}
             
-            {isAccountList && listData.length > 0 && (
-              <p className="text-xs text-center text-muted mt-2">Detaylı hesap ekstresi (mutabakat) için bir hesaba tıklayın.</p>
-            )}
+            <p className="text-xs text-center text-muted mt-2">Detaylı işlem geçmişi ve ekstre için bir kayda tıklayın.</p>
           </div>
         </div>
       </div>
@@ -299,6 +303,14 @@ const Dashboard = ({ onEditTransaction }) => {
       
       {selectedAccountForStatement && (
         <AccountStatement account={selectedAccountForStatement} onClose={() => setSelectedAccountForStatement(null)} />
+      )}
+
+      {selectedPersonForStatement && (
+        <PersonStatement 
+          personData={selectedPersonForStatement} 
+          onClose={() => setSelectedPersonForStatement(null)} 
+          onOpenForm={onEditTransaction} 
+        />
       )}
 
       {renderWidgetModal()}

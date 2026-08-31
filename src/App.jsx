@@ -12,15 +12,18 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [transactionToEdit, setTransactionToEdit] = useState(null);
+  const [prefillData, setPrefillData] = useState(null);
 
-  const handleOpenForm = (tx = null) => {
+  const handleOpenForm = (tx = null, prefill = null) => {
     setTransactionToEdit(tx);
+    setPrefillData(prefill);
     setIsFormOpen(true);
   };
 
   const handleCloseForm = () => {
     setIsFormOpen(false);
     setTransactionToEdit(null);
+    setPrefillData(null);
   };
 
   return (
@@ -30,7 +33,7 @@ function App() {
           
           <main className="w-full">
             {activeTab === 'dashboard' && <Dashboard onEditTransaction={handleOpenForm} />}
-            {activeTab === 'accounts' && <Accounts />}
+            {activeTab === 'accounts' && <Accounts onOpenForm={handleOpenForm} />}
             {activeTab === 'charts' && <Charts />}
             {activeTab === 'settings' && <Settings />}
           </main>
@@ -45,6 +48,7 @@ function App() {
             <TransactionForm 
               onClose={handleCloseForm} 
               transactionToEdit={transactionToEdit}
+              prefillData={prefillData}
             />
           )}
           

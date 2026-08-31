@@ -4,9 +4,11 @@ import { Plus, Trash2, Edit2, ChevronRight } from 'lucide-react';
 import AccountForm from './AccountForm';
 import BillForm from './BillForm';
 import AccountStatement from './AccountStatement';
+import PersonStatement from './PersonStatement';
 
-const Accounts = () => {
-  const { accounts, bills, deleteAccount, deleteBill, currentUser } = useBudget();
+const Accounts = ({ onOpenForm }) => {
+  const { accounts, bills, getDebts, deleteAccount, deleteBill, currentUser } = useBudget();
+  const activeDebts = getDebts();
   
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState(null);
@@ -15,6 +17,9 @@ const Accounts = () => {
   const [editingBill, setEditingBill] = useState(null);
 
   const [selectedAccountForStatement, setSelectedAccountForStatement] = useState(null);
+  const [selectedPersonForStatement, setSelectedPersonForStatement] = useState(null);
+
+  const formatMoney = (amount) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(Math.abs(amount));
 
   const handleEditAccount = (e, acc) => {
     e.stopPropagation();
@@ -137,6 +142,44 @@ const Accounts = () => {
         </div>
       </div>
 
+      <div className="card mt-2" style={{ border: 'none' }}>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold">Kişiler & Cari Hesaplar</h3>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {activeDebts.length === 0 && (
+             <p className="text-muted text-center py-4 text-sm">Hiçbir cari borç/alacak kaydınız yok.</p>
+          )}
+          {activeDebts.map((d, idx) => {
+            const isOverdue = d.latestDueDate && new Date(d.latestDueDate) < new Date(new Date().setHours(0,0,0,0));
+            return (
+              <div 
+                key={d.person + idx} 
+                onClick={() => setSelectedPersonForStatement(d)}
+                className="flex justify-between items-center p-3 rounded-lg cursor-pointer transition-colors" 
+                style={{ backgroundColor: 'var(--bg-color)', border: '1px solid transparent' }}
+                onMouseOver={e => e.currentTarget.style.borderColor = 'var(--primary-color)'}
+                onMouseOut={e => e.currentTarget.style.borderColor = 'transparent'}
+              >
+                <div>
+                  <p className="font-semibold flex items-center gap-1">{d.person} <ChevronRight size={14} className="text-muted" /></p>
+                  <p className={`text-xs ${isOverdue ? 'text-red-500 font-bold' : 'text-muted'}`}>
+                    {d.latestDueDate ? (isOverdue ? `Vade Geçti: ${new Date(d.latestDueDate).toLocaleDateString('tr-TR')}` : `Vade: ${new Date(d.latestDueDate).toLocaleDateString('tr-TR')}`) : 'Vadesiz'}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className={`font-bold ${d.netAmount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {d.netAmount > 0 ? '+' : '-'}{formatMoney(d.netAmount)}
+                  </p>
+                  <p className="text-xs text-muted">{d.netAmount > 0 ? 'Alacak' : 'Borç'}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {isAccountModalOpen && (
         <AccountForm 
           onClose={() => setIsAccountModalOpen(false)} 
@@ -155,6 +198,14 @@ const Accounts = () => {
         <AccountStatement 
           account={selectedAccountForStatement} 
           onClose={() => setSelectedAccountForStatement(null)} 
+        />
+      )}
+
+      {selectedPersonForStatement && (
+        <PersonStatement 
+          personData={selectedPersonForStatement} 
+          onClose={() => setSelectedPersonForStatement(null)} 
+          onOpenForm={onOpenForm}
         />
       )}
 

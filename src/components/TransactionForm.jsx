@@ -8,10 +8,12 @@ const DEFAULT_CATEGORIES = {
   income: ['Maaş', 'Prim', 'Yatırım Getirisi', 'Kira Geliri', 'Diğer'],
   transfer: ['Transfer / Virman'],
   debt_given: ['Borç Verildi'],
-  debt_taken: ['Borç Alındı']
+  debt_taken: ['Borç Alındı'],
+  debt_collection: ['Borç Tahsilatı'],
+  debt_payment: ['Borç Ödemesi']
 };
 
-const TransactionForm = ({ onClose, transactionToEdit }) => {
+const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
   const { addTransaction, editTransaction, transactions, accounts, addAccount, addBill } = useBudget();
   
   const [type, setType] = useState('expense');
@@ -74,20 +76,30 @@ const TransactionForm = ({ onClose, transactionToEdit }) => {
       setAccountId(transactionToEdit.accountId || '');
       setTargetAccountId(transactionToEdit.targetAccountId || '');
       setIsInstallment(false); // Düzenlemede taksit eklenmez
+    } else if (prefillData) {
+      setType(prefillData.type);
+      if (prefillData.person) setPerson(prefillData.person);
+      setCategory(DEFAULT_CATEGORIES[prefillData.type]?.[0] || 'Diğer');
+      if (prefillData.type === 'debt_collection') setTitle('Tahsilat');
+      if (prefillData.type === 'debt_payment') setTitle('Ödeme');
+      
+      if (accounts.length > 0) {
+        setAccountId(accounts[0].id);
+      }
     } else {
       if (accounts.length > 0) {
         setAccountId(accounts[0].id);
         if (accounts.length > 1) setTargetAccountId(accounts[1].id);
       }
     }
-  }, [transactionToEdit, accounts]);
+  }, [transactionToEdit, prefillData, accounts]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title || !amount || !date || !accountId) return;
     if (type === 'transfer' && !targetAccountId) return;
-    if ((type === 'debt_given' || type === 'debt_taken') && !person) {
-      alert("Lütfen borç işlemi için bir Kişi Adı girin.");
+    if (['debt_given', 'debt_taken', 'debt_collection', 'debt_payment'].includes(type) && !person) {
+      alert("Lütfen borç/tahsilat/ödeme işlemi için bir Kişi Adı girin.");
       return;
     }
 
@@ -157,6 +169,10 @@ const TransactionForm = ({ onClose, transactionToEdit }) => {
       setTitle('Hesaplar Arası Transfer');
     } else if (newType === 'debt_given' || newType === 'debt_taken') {
       setTitle(newType === 'debt_given' ? 'Borç Verildi' : 'Borç Alındı');
+    } else if (newType === 'debt_collection') {
+      setTitle('Tahsilat');
+    } else if (newType === 'debt_payment') {
+      setTitle('Ödeme');
     } else {
       setTitle('');
     }
@@ -186,6 +202,8 @@ const TransactionForm = ({ onClose, transactionToEdit }) => {
               <option value="transfer">Transfer (Virman / K.Kartı Ödeme)</option>
               <option value="debt_given">Borç Verdim (Alacak)</option>
               <option value="debt_taken">Borç Aldım (Borç)</option>
+              <option value="debt_collection">Borç Tahsilatı (Bana Ödendi)</option>
+              <option value="debt_payment">Borç Ödemesi (Ben Ödedim)</option>
             </select>
           </div>
 
@@ -266,7 +284,7 @@ const TransactionForm = ({ onClose, transactionToEdit }) => {
                 {type === 'expense' ? 'Nereden Ödenecek?' : 
                  type === 'income' ? 'Nereye Gelecek?' :
                  type === 'transfer' ? 'Çıkış Yapılacak (Gönderen) Hesap' :
-                 type === 'debt_given' ? 'Para Nereden Çıkacak?' : 'Para Hangi Hesaba Girecek?'}
+                 (type === 'debt_given' || type === 'debt_payment') ? 'Para Nereden Çıkacak?' : 'Para Hangi Hesaba Girecek?'}
               </label>
               <button 
                 type="button" 
@@ -353,24 +371,24 @@ const TransactionForm = ({ onClose, transactionToEdit }) => {
 
           <div className="flex gap-4">
             <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label">{type.startsWith('debt') ? 'Veriliş / Alınış Tarihi' : 'Tarih'}</label>
+              <label className="form-label">{(type === 'debt_given' || type === 'debt_taken') ? 'Veriliş / Alınış Tarihi' : 'Tarih'}</label>
               <input 
                 type="date" 
                 value={date} 
-                onChange={e => setDate(e.target.value)}
-                className="form-input"
-                required
+                onChange={e => setDate(e.target.value)} 
+                className="form-input" 
+                required 
               />
             </div>
             
-            {type.startsWith('debt') ? (
+            {(type === 'debt_given' || type === 'debt_taken') ? (
                <div className="form-group" style={{ flex: 1 }}>
                  <label className="form-label">Ödeneceği (Vade) Tarihi</label>
                  <input 
                    type="date" 
                    value={dueDate} 
-                   onChange={e => setDueDate(e.target.value)}
-                   className="form-input"
+                   onChange={e => setDueDate(e.target.value)} 
+                   className="form-input" 
                  />
                </div>
             ) : (
@@ -409,7 +427,7 @@ const TransactionForm = ({ onClose, transactionToEdit }) => {
             </div>
             
             <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label">Kişi Adı {type.startsWith('debt') && <span className="text-danger">*</span>}</label>
+              <label className="form-label">Kişi Adı {['debt_given', 'debt_taken', 'debt_collection', 'debt_payment'].includes(type) && <span className="text-danger">*</span>}</label>
               <input 
                 type="text" 
                 list="persons"

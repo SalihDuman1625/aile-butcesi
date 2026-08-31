@@ -132,9 +132,9 @@ export const BudgetProvider = ({ children }) => {
 
       // Normal Gelir/Gider
       if (acc.id === tx.accountId) {
-        if (tx.type === 'expense' || tx.type === 'debt_given') {
+        if (tx.type === 'expense' || tx.type === 'debt_given' || tx.type === 'debt_payment') {
           newBalance -= amt;
-        } else if (tx.type === 'income' || tx.type === 'debt_taken') {
+        } else if (tx.type === 'income' || tx.type === 'debt_taken' || tx.type === 'debt_collection') {
           newBalance += amt;
         } else if (tx.type === 'transfer') {
           newBalance -= amt; // Çıkış
@@ -156,8 +156,8 @@ export const BudgetProvider = ({ children }) => {
       const amt = parseFloat(tx.amount || 0);
 
       if (acc.id === tx.accountId) {
-        if (tx.type === 'expense' || tx.type === 'debt_given') newBalance += amt;
-        else if (tx.type === 'income' || tx.type === 'debt_taken') newBalance -= amt;
+        if (tx.type === 'expense' || tx.type === 'debt_given' || tx.type === 'debt_payment') newBalance += amt;
+        else if (tx.type === 'income' || tx.type === 'debt_taken' || tx.type === 'debt_collection') newBalance -= amt;
         else if (tx.type === 'transfer') newBalance += amt;
       }
       if (tx.type === 'transfer' && acc.id === tx.targetAccountId) {
@@ -285,16 +285,20 @@ export const BudgetProvider = ({ children }) => {
     const debtMap = {};
 
     transactions.forEach(t => {
-      if (t.type === 'debt_given' || t.type === 'debt_taken') {
+      if (['debt_given', 'debt_taken', 'debt_payment', 'debt_collection'].includes(t.type)) {
         const p = t.person || 'Bilinmeyen';
         if (!debtMap[p]) {
-          debtMap[p] = { person: p, netAmount: 0, latestDueDate: null };
+          debtMap[p] = { person: p, netAmount: 0, latestDueDate: null, transactions: [] };
         }
         
-        if (t.type === 'debt_given') debtMap[p].netAmount += parseFloat(t.amount);
-        if (t.type === 'debt_taken') debtMap[p].netAmount -= parseFloat(t.amount);
+        if (t.type === 'debt_given') debtMap[p].netAmount += parseFloat(t.amount); // they owe me (+)
+        if (t.type === 'debt_taken') debtMap[p].netAmount -= parseFloat(t.amount); // I owe them (-)
+        if (t.type === 'debt_collection') debtMap[p].netAmount -= parseFloat(t.amount); // they owe me less
+        if (t.type === 'debt_payment') debtMap[p].netAmount += parseFloat(t.amount); // I owe them less
         
-        if (t.dueDate) {
+        debtMap[p].transactions.push(t);
+        
+        if (t.dueDate && (t.type === 'debt_given' || t.type === 'debt_taken')) {
           if (!debtMap[p].latestDueDate || new Date(t.dueDate) < new Date(debtMap[p].latestDueDate)) {
             debtMap[p].latestDueDate = t.dueDate;
           }
