@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useBudget } from '../context/BudgetContext';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { Share2, Filter, SearchX, FileText } from 'lucide-react';
+import { Share2, Filter, SearchX, FileText, FileBarChart } from 'lucide-react';
 import PersonStatement from './PersonStatement';
+import FinancialStatement from './FinancialStatement';
 
 const COLORS = ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316', '#64748B'];
 
@@ -17,6 +18,7 @@ const Charts = ({ onOpenForm }) => {
   const [type, setType] = useState('all');
 
   const [selectedPersonForStatement, setSelectedPersonForStatement] = useState(null);
+  const [showFinancialStatement, setShowFinancialStatement] = useState(false);
 
   const uniquePersons = ['Tümü', ...new Set(transactions.map(t => t.person).filter(Boolean))];
 
@@ -114,6 +116,10 @@ const Charts = ({ onOpenForm }) => {
           <Share2 size={14} /> WhatsApp
         </button>
       </div>
+
+      <button onClick={() => setShowFinancialStatement(true)} className="btn w-full flex items-center justify-center gap-2 mb-2 hide-on-print shadow-sm" style={{ padding: '0.6rem', backgroundColor: '#0F172A', color: 'white', fontSize: '0.9rem' }}>
+        <FileBarChart size={16} /> Bilanço ve Gelir Tablosu (Özet)
+      </button>
 
       {person !== 'Tümü' && (
         <button onClick={handleOpenStatement} className="btn w-full flex items-center justify-center gap-2 mb-2 hide-on-print" style={{ padding: '0.6rem', backgroundColor: 'var(--primary-color)', color: 'white', fontSize: '0.9rem' }}>
@@ -286,6 +292,14 @@ const Charts = ({ onOpenForm }) => {
           personData={selectedPersonForStatement} 
           onClose={() => setSelectedPersonForStatement(null)} 
           onOpenForm={onOpenForm}
+        />
+      )}
+
+      {showFinancialStatement && (
+        <FinancialStatement
+          onClose={() => setShowFinancialStatement(false)}
+          dateRange={dateRange}
+          filteredTransactions={filteredTxs}
         />
       )}
     </div>
