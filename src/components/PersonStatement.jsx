@@ -165,7 +165,7 @@ const PersonStatement = ({ personData, onClose, onOpenForm }) => {
   const exportToExcel = () => {
     let csvContent = "\uFEFF";
     csvContent += "Tarih;Islem;Kategori;Tutar\n";
-    personTransactions.forEach(t => {
+    accountTransactions.forEach(t => {
       const d = new Date(t.date).toLocaleDateString('tr-TR');
       const title = (t.title || '').replace(/;/g, ',');
       const cat = (t.category || '').replace(/;/g, ',');
@@ -231,8 +231,8 @@ const PersonStatement = ({ personData, onClose, onOpenForm }) => {
               <Download size={20} />
             </button>
             <button onClick={() => {
-const totalAmountCalc = personTransactions.reduce((acc, t) => { let isDebtToMe = false; if (t.type === 'debt_given' || t.type === 'debt_payment') isDebtToMe = true; return acc + (isDebtToMe ? t.amount : -t.amount); }, 0);
-openPdfTable(`${personData.name} Ekstresi`, personTransactions, totalAmountCalc);
+const totalAmountCalc = accountTransactions.reduce((acc, t) => { let isDebtToMe = false; if (t.type === 'debt_given' || t.type === 'debt_payment') isDebtToMe = true; return acc + (isDebtToMe ? t.amount : -t.amount); }, 0);
+openPdfTable(`${personData.name} Ekstresi`, accountTransactions, totalAmountCalc);
 }} title="Yazdır / PDF Al" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-primary">
               <Printer size={20} />
             </button>
@@ -336,12 +336,12 @@ openPdfTable(`${personData.name} Ekstresi`, personTransactions, totalAmountCalc)
             </div>
           )}
 
-          {personTransactions.length > 0 && (
+          {accountTransactions.length > 0 && (
             <div className="mt-4 p-4 rounded-lg bg-gray-50 flex justify-between items-center border border-gray-200 print-only" style={{ display: 'none' }}>
               <span className="font-bold text-gray-700">Dönem İçi Toplam Değişim:</span>
               <span className="font-bold text-xl text-primary">
                 {formatMoney(
-                  personTransactions.reduce((acc, t) => {
+                  accountTransactions.reduce((acc, t) => {
                     let isDebtToMe = false;
                     if (t.type === 'debt_given' || t.type === 'debt_payment') isDebtToMe = true;
                     return acc + (isDebtToMe ? t.amount : -t.amount);
