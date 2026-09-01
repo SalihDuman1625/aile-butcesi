@@ -24,11 +24,11 @@ const FinancialStatement = ({ onClose, dateRange, filteredTransactions }) => {
   activeDebts.forEach(d => {
     if (d.netAmount > 0) {
       sumReceivables += d.netAmount;
-      receivablesDetail.push({ name: d.person, amount: d.netAmount });
+      receivablesDetail.push({ name: d.person, amount: d.netAmount, assets: d.assets });
     }
     if (d.netAmount < 0) {
       sumPayables += Math.abs(d.netAmount);
-      payablesDetail.push({ name: d.person, amount: Math.abs(d.netAmount) });
+      payablesDetail.push({ name: d.person, amount: Math.abs(d.netAmount), assets: d.assets });
     }
   });
 
