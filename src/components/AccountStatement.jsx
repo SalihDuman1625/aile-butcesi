@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useBudget } from '../context/BudgetContext';
-import { X, ShieldAlert, CheckCircle2, TrendingDown, TrendingUp, ArrowRightLeft } from 'lucide-react';
+import { X, ShieldAlert, CheckCircle2, TrendingDown, TrendingUp, ArrowRightLeft, Edit2, Trash2 } from 'lucide-react';
 
-const AccountStatement = ({ account, onClose }) => {
-  const { transactions, addTransaction, editAccount } = useBudget();
+const AccountStatement = ({ account, onClose, onOpenForm }) => {
+  const { transactions, addTransaction, editAccount, deleteTransaction, currentUser } = useBudget();
   const [actualBalance, setActualBalance] = useState('');
   
   // Sadece bu hesaba ait işlemleri (Giren ve Çıkan) kronolojik sıraya göre listele (Yeniden eskiye)
@@ -132,12 +132,24 @@ const AccountStatement = ({ account, onClose }) => {
                       <p className="text-xs text-muted">{new Date(t.date).toLocaleDateString('tr-TR')} • {t.category}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className={`font-bold text-sm ${isIncoming ? 'text-success' : 'text-main'}`}>
-                      {isIncoming ? '+' : '-'}{formatMoney(t.amount)}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <div className="text-right">
+                        <p className={`font-bold text-sm ${isIncoming ? 'text-success' : 'text-main'}`}>
+                          {isIncoming ? '+' : '-'}{formatMoney(t.amount)}
+                        </p>
+                      </div>
+                      {(currentUser?.role === 'admin' || t.addedBy === currentUser?.id) && (
+                        <>
+                          <button onClick={() => onOpenForm && onOpenForm(t)} className="text-muted ml-2 hover:text-primary" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                            <Edit2 size={16} />
+                          </button>
+                          <button onClick={() => deleteTransaction(t.id)} className="text-danger ml-1 hover:text-red-700" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                            <Trash2 size={16} />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
               );
             })
           )}

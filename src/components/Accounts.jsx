@@ -218,6 +218,7 @@ const Accounts = ({ onOpenForm }) => {
         <AccountStatement 
           account={selectedAccountForStatement} 
           onClose={() => setSelectedAccountForStatement(null)} 
+          onOpenForm={onOpenForm}
         />
       )}
 

@@ -302,7 +302,7 @@ const Dashboard = ({ onEditTransaction, onViewAll }) => {
       )}
       
       {selectedAccountForStatement && (
-        <AccountStatement account={selectedAccountForStatement} onClose={() => setSelectedAccountForStatement(null)} />
+        <AccountStatement account={selectedAccountForStatement} onClose={() => setSelectedAccountForStatement(null)} onOpenForm={onEditTransaction} />
       )}
 
       {selectedPersonForStatement && (

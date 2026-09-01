@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useBudget } from '../context/BudgetContext';
-import { X, ArrowUpCircle, ArrowDownCircle, Printer, Download, Calendar } from 'lucide-react';
+import { X, ArrowUpCircle, ArrowDownCircle, Printer, Download, Calendar, Edit2, Trash2 } from 'lucide-react';
 
 const PersonStatement = ({ personData, onClose, onOpenForm }) => {
-  const { transactions } = useBudget();
+  const { transactions, deleteTransaction, currentUser } = useBudget();
   
   useEffect(() => {
     document.body.classList.add('printing-modal');
@@ -278,12 +278,24 @@ const PersonStatement = ({ personData, onClose, onOpenForm }) => {
                         )}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className={`font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                        {isPositive ? '+' : '-'}{formatMoney(t.amount)}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <div className="text-right">
+                          <p className={`font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                            {isPositive ? '+' : '-'}{formatMoney(t.amount)}
+                          </p>
+                        </div>
+                        {(currentUser?.role === 'admin' || t.addedBy === currentUser?.id) && (
+                          <>
+                            <button onClick={() => onOpenForm && onOpenForm(t)} className="text-muted ml-2 hover:text-primary" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                              <Edit2 size={16} />
+                            </button>
+                            <button onClick={() => deleteTransaction(t.id)} className="text-danger ml-1 hover:text-red-700" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                              <Trash2 size={16} />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
-                  </div>
                 );
               })}
             </div>
