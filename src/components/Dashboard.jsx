@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useBudget } from '../context/BudgetContext';
-import { ShoppingBag, Coffee, Home, Zap, Heart, Book, Film, MoreHorizontal, Briefcase, TrendingUp, DollarSign, AlertCircle, CheckCircle2, Trash2, Edit2, ArrowRightLeft, HandCoins, Building, CreditCard, Coins, X, Landmark, Handshake } from 'lucide-react';
+import { TrendingDown, ShoppingBag, Coffee, Home, Zap, Heart, Book, Film, MoreHorizontal, Briefcase, TrendingUp, DollarSign, AlertCircle, CheckCircle2, Trash2, Edit2, ArrowRightLeft, HandCoins, Building, CreditCard, Coins, X, Landmark, Handshake } from 'lucide-react';
 import PayBillModal from './PayBillModal';
 import AccountStatement from './AccountStatement';
 import PersonStatement from './PersonStatement';
+import IncomeExpenseStatement from './IncomeExpenseStatement';
 
 const getCategoryIcon = (category, type) => {
   if (type === 'transfer') return <ArrowRightLeft size={20} />;
@@ -55,6 +56,20 @@ const Dashboard = ({ onEditTransaction, onViewAll }) => {
   
   const sumDebtsIOwe = activeDebts.filter(d => d.netAmount < 0).reduce((sum, d) => sum + Math.abs(d.netAmount), 0);
   const sumDebtsOwedToMe = activeDebts.filter(d => d.netAmount > 0).reduce((sum, d) => sum + d.netAmount, 0);
+
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+  
+  const currentMonthTxs = transactions.filter(t => {
+    const d = new Date(t.date);
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+
+  const currentMonthIncome = currentMonthTxs.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+  const currentMonthExpense = currentMonthTxs.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+  const [selectedIncomeExpenseForStatement, setSelectedIncomeExpenseForStatement] = useState(null);
+
 
   const renderWidgetModal = () => {
     if (!activeWidget) return null;
@@ -303,6 +318,16 @@ const Dashboard = ({ onEditTransaction, onViewAll }) => {
       
       {selectedAccountForStatement && (
         <AccountStatement account={selectedAccountForStatement} onClose={() => setSelectedAccountForStatement(null)} onOpenForm={onEditTransaction} />
+      )}
+
+      {selectedIncomeExpenseForStatement && (
+        <IncomeExpenseStatement 
+          type={selectedIncomeExpenseForStatement}
+          monthIndex={currentMonth}
+          year={currentYear}
+          onClose={() => setSelectedIncomeExpenseForStatement(null)}
+          onOpenForm={onEditTransaction}
+        />
       )}
 
       {selectedPersonForStatement && (
