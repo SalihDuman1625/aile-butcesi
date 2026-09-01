@@ -58,9 +58,8 @@ code = code.replace(
     "const [selectedPersonForStatement, setSelectedPersonForStatement] = useState(null);\n" + state_insert
 )
 
-# Now, extract the grid content starting from "NET VARLIK" to the end of the grid.
-# The grid starts at: `<div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-1">`
-# And ends before `{/* Upcoming Bills Alert */}`
+# Now, we will extract exactly the grid widgets.
+# We will find `<div className="widget-box widget-bank"` and replace all widgets with a function call.
 
 render_fn_code = """
   const renderWidget = (id, idx) => {
@@ -147,17 +146,74 @@ code = code.replace(
     render_fn_code + "\n  const renderWidgetModal = () => {"
 )
 
-# Now replace the inner part of the grid with the mapping
-# Regex will find everything between `          {/* Small Widgets with Elegant Layout */}` and `      </div>\n\n      {/* Upcoming Bills Alert */}`
+# Carefully remove ONLY the 8 widget-boxes from the grid!
+boxes_to_remove = """          <div className="widget-box widget-bank" onClick={() => setActiveWidget('bank')}>
+            <div className="widget-header">
+              <div className="widget-icon"><Building size={16} /></div>
+              <span className="widget-title">Banka</span>
+            </div>
+            <p className="widget-value">{formatMoney(sumBank)}</p>
+          </div>
 
-start_marker = "          {/* Small Widgets with Elegant Layout */}"
-end_marker = "      </div>\n\n      {/* Upcoming Bills Alert */}"
-new_inner = """          {/* Small Widgets with Elegant Layout */}
-          {widgetOrder.map((id, index) => renderWidget(id, index))}
-"""
+          <div className="widget-box widget-cash" onClick={() => setActiveWidget('cash')}>
+            <div className="widget-header">
+              <div className="widget-icon"><Coins size={16} /></div>
+              <span className="widget-title">Nakit Kasa</span>
+            </div>
+            <p className="widget-value">{formatMoney(sumCash)}</p>
+          </div>
 
-regex = re.compile(re.escape(start_marker) + r'.*?' + re.escape(end_marker), re.DOTALL)
-code = regex.sub(new_inner + end_marker, code)
+          <div className="widget-box widget-cc" onClick={() => setActiveWidget('cc')}>
+            <div className="widget-header">
+              <div className="widget-icon"><CreditCard size={16} /></div>
+              <span className="widget-title">Kredi Kartı</span>
+            </div>
+            <p className="widget-value">{formatMoney(sumCC)}</p>
+          </div>
+
+          <div className="widget-box widget-inv" onClick={() => setActiveWidget('inv')}>
+            <div className="widget-header">
+              <div className="widget-icon"><Landmark size={16} /></div>
+              <span className="widget-title">Birikimler</span>
+            </div>
+            <p className="widget-value">{formatMoney(sumInv)}</p>
+          </div>
+
+          <div className="widget-box widget-rec" onClick={() => setActiveWidget('receivables')}>
+            <div className="widget-header">
+              <div className="widget-icon"><HandCoins size={16} /></div>
+              <span className="widget-title">Alacaklarım</span>
+            </div>
+            <p className="widget-value">{formatMoney(sumDebtsOwedToMe)}</p>
+          </div>
+  
+        <div className="widget-box widget-debt" onClick={() => setActiveWidget('debts')}>
+          <div className="widget-header">
+            <div className="widget-icon"><Handshake size={16} /></div>
+            <span className="widget-title">Borçlarım</span>
+          </div>
+          <p className="widget-value">{formatMoney(sumDebtsIOwe)}</p>
+        </div>
+
+        <div className="widget-box widget-income" onClick={() => setSelectedIncomeExpenseForStatement('income')}>
+          <div className="widget-header">
+            <div className="widget-icon"><TrendingUp size={16} /></div>
+            <span className="widget-title">Gelirler (Bu Ay)</span>
+          </div>
+          <p className="widget-value">{formatMoney(currentMonthIncome)}</p>
+        </div>
+
+        <div className="widget-box widget-expense" onClick={() => setSelectedIncomeExpenseForStatement('expense')}>
+          <div className="widget-header">
+            <div className="widget-icon"><TrendingDown size={16} /></div>
+            <span className="widget-title">Giderler (Bu Ay)</span>
+          </div>
+          <p className="widget-value">{formatMoney(currentMonthExpense)}</p>
+        </div>"""
+
+# Ensure exact match is removed, but whitespace may vary, so using regex to replace between Banka and Expense.
+regex_boxes = re.compile(r'<div className="widget-box widget-bank".*?Giderler \(Bu Ay\).*?<\/div>\s*<\/div>', re.DOTALL)
+code = regex_boxes.sub("{widgetOrder.map((id, index) => renderWidget(id, index))}", code)
 
 
 with open('src/components/Dashboard.jsx', 'w', encoding='utf-8') as f:

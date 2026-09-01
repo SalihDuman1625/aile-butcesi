@@ -276,7 +276,21 @@ const Dashboard = ({ onEditTransaction, onViewAll }) => {
 
       {/* DASHBOARD WIDGETS GRID */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-1">
+          <div className="widget-box widget-income" onClick={() => setSelectedIncomeExpenseForStatement('income')}>
+            <div className="widget-header">
+              <div className="widget-icon"><TrendingUp size={16} /></div>
+              <span className="widget-title">Bu Ayki Gelirler</span>
+            </div>
+            <p className="widget-value">{formatMoney(currentMonthIncome)}</p>
+          </div>
 
+          <div className="widget-box widget-expense" onClick={() => setSelectedIncomeExpenseForStatement('expense')}>
+            <div className="widget-header">
+              <div className="widget-icon"><TrendingDown size={16} /></div>
+              <span className="widget-title">Bu Ayki Giderler</span>
+            </div>
+            <p className="widget-value">{formatMoney(currentMonthExpense)}</p>
+          </div>
         
         {/* Net Worth (Full Width) */}
         <div className="col-span-2 md:col-span-4 credit-card flex flex-col justify-center items-start">
@@ -331,22 +345,6 @@ const Dashboard = ({ onEditTransaction, onViewAll }) => {
             <span className="widget-title">Borçlarım</span>
           </div>
           <p className="widget-value">{formatMoney(sumDebtsIOwe)}</p>
-        </div>
-
-        <div className="widget-box widget-income" onClick={() => setSelectedIncomeExpenseForStatement('income')}>
-          <div className="widget-header">
-            <div className="widget-icon"><TrendingUp size={16} /></div>
-            <span className="widget-title">Gelirler (Bu Ay)</span>
-          </div>
-          <p className="widget-value">{formatMoney(currentMonthIncome)}</p>
-        </div>
-
-        <div className="widget-box widget-expense" onClick={() => setSelectedIncomeExpenseForStatement('expense')}>
-          <div className="widget-header">
-            <div className="widget-icon"><TrendingDown size={16} /></div>
-            <span className="widget-title">Giderler (Bu Ay)</span>
-          </div>
-          <p className="widget-value">{formatMoney(currentMonthExpense)}</p>
         </div>
 
       </div>
