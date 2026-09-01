@@ -164,10 +164,10 @@ const IncomeExpenseStatement = ({ type, monthIndex, year, onClose, onOpenForm })
                     </div>
                     {(currentUser?.role === 'admin' || t.addedBy === currentUser?.id) && (
                       <>
-                        <button className="hide-on-print" onClick={() => onOpenForm && onOpenForm(t)} className="text-muted ml-2 hover:text-primary hide-charts-on-print" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                        <button onClick={() => onOpenForm && onOpenForm(t)} className="hide-on-print text-muted ml-2 hover:text-primary hide-charts-on-print" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                           <Edit2 size={16} />
                         </button>
-                        <button className="hide-on-print" onClick={() => deleteTransaction(t.id)} className="text-danger ml-1 hover:text-red-700 hide-charts-on-print" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                        <button onClick={() => deleteTransaction(t.id)} className="hide-on-print text-danger ml-1 hover:text-red-700 hide-charts-on-print" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                           <Trash2 size={16} />
                         </button>
                       </>
