@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { X, Printer, FileText, List } from 'lucide-react';
+import { openFinancialPdf } from '../utils/pdfExport';
 import { useBudget } from '../context/BudgetContext';
 
 const FinancialStatement = ({ onClose, dateRange, filteredTransactions }) => {
@@ -68,9 +69,22 @@ const FinancialStatement = ({ onClose, dateRange, filteredTransactions }) => {
 
   const handlePrint = (detailed) => {
     setIsDetailed(detailed);
-    setTimeout(() => {
-      window.print();
-    }, 300);
+    
+    const data = {
+      totalCashAndBank, cashAndBankAccounts,
+      totalInvestments, investmentAccounts,
+      sumReceivables, receivablesDetail,
+      totalAssets,
+      totalCCDebt, creditCardAccounts,
+      sumPayables, payablesDetail,
+      totalLiabilities,
+      equity,
+      periodIncome, incomeByCategory,
+      periodExpense, expenseByCategory,
+      periodNetIncome
+    };
+    
+    openFinancialPdf(detailed, dateRange, data);
   };
 
   return (
