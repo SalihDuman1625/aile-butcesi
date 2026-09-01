@@ -7,6 +7,8 @@ const DEFAULT_CATEGORIES = {
   expense: ['Mutfak', 'Fatura', 'Kira', 'Ulaşım', 'Sağlık', 'Eğitim', 'Eğlence', 'Giyim', 'Diğer'],
   income: ['Maaş', 'Diğer'],
   transfer: ['Transfer / Virman'],
+    investment_buy: ['Yatırım Alış'],
+    investment_sell: ['Yatırım Satış'],
   debt_given: ['Borç Verildi'],
   debt_taken: ['Borç Alındı'],
   debt_collection: ['Borç Tahsilatı (Bana Ödendi)'],
@@ -44,7 +46,10 @@ const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
   const [person, setPerson] = useState('');
   
   const [accountId, setAccountId] = useState(''); // Source
-  const [targetAccountId, setTargetAccountId] = useState(''); // Target (for transfer)
+  const [targetAccountId, setTargetAccountId] = useState('');
+  const [assetType, setAssetType] = useState('TL');
+  const [assetAmount, setAssetAmount] = useState('');
+  const [assetRate, setAssetRate] = useState('');
 
   // Taksit State'leri
   const [isInstallment, setIsInstallment] = useState(false);
@@ -102,6 +107,9 @@ const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
       setPerson(transactionToEdit.person === 'Ortak' ? '' : (transactionToEdit.person || ''));
       setAccountId(transactionToEdit.accountId || '');
       setTargetAccountId(transactionToEdit.targetAccountId || '');
+      setAssetType(transactionToEdit.assetType || 'TL');
+      setAssetAmount(transactionToEdit.assetAmount || '');
+      setAssetRate(transactionToEdit.assetRate || '');
       setIsInstallment(false); // Düzenlemede taksit eklenmez
     } else if (prefillData) {
       setType(prefillData.type);
@@ -124,7 +132,7 @@ const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title || !amount || !date || !accountId) return;
-    if (type === 'transfer' && !targetAccountId) return;
+    if ((['transfer', 'investment_buy', 'investment_sell'].includes(type)) && !targetAccountId) return;
     if (['debt_given', 'debt_taken', 'debt_collection', 'debt_payment'].includes(type) && !person) {
       alert("Lütfen borç/tahsilat/ödeme işlemi için bir Kişi Adı girin.");
       return;
@@ -176,7 +184,10 @@ const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
         accountType,
         person: person.trim() || 'Ortak',
         accountId,
-        targetAccountId: type === 'transfer' ? targetAccountId : null
+        targetAccountId: ['transfer', 'investment_buy', 'investment_sell'].includes(type) ? targetAccountId : null,
+      assetType: ['debt_given', 'debt_taken', 'debt_collection', 'debt_payment'].includes(type) ? assetType : null,
+      assetAmount: (['investment_buy', 'investment_sell'].includes(type) || (['debt_given', 'debt_taken', 'debt_collection', 'debt_payment'].includes(type) && assetType !== 'TL')) ? parseFloat(assetAmount || 0) : null,
+      assetRate: (['investment_buy', 'investment_sell'].includes(type) || (['debt_given', 'debt_taken', 'debt_collection', 'debt_payment'].includes(type) && assetType !== 'TL')) ? parseFloat(assetRate || 0) : null
       };
 
       if (transactionToEdit) {
@@ -227,6 +238,8 @@ const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
               <option value="expense">Gider</option>
               <option value="income">Gelir</option>
               <option value="transfer">Transfer (Virman / K.Kartı Ödeme)</option>
+                <option value="investment_buy">Yatırım Alış (Nakit -&gt; Altın/Döviz)</option>
+                <option value="investment_sell">Yatırım Satış (Altın/Döviz -&gt; Nakit)</option>
               <option value="debt_given">Borç Verdim (Alacak)</option>
               <option value="debt_taken">Borç Aldım (Borç)</option>
               <option value="debt_collection">Borç Tahsilatı (Bana Ödendi)</option>
@@ -371,9 +384,11 @@ const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
               )}
           </div>
 
-          {type === 'transfer' && (
+          {(['transfer', 'investment_buy', 'investment_sell'].includes(type)) && (
             <div className="form-group p-3 rounded-lg" style={{ backgroundColor: '#EEF2FF', border: '1px solid #C7D2FE' }}>
-              <label className="form-label text-primary">Hedef Hesap (Para Nereye Gidecek?)</label>
+              <label className="form-label text-primary">
+                {type === 'transfer' ? 'Hedef Hesap (Para Nereye Gidecek?)' : type === 'investment_buy' ? 'Hangi Yatırım Hesabına (Örn: Altın Kasası) Alınacak?' : 'Hangi Yatırım Hesabından (Örn: Altın Kasası) Satılacak?'}
+              </label>
               <div className="flex gap-2 items-center w-full">
                   <select 
                     value={targetAccountId} 
@@ -382,19 +397,61 @@ const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
                     required
                   >
                     <option value="">Seçiniz</option>
-                    {accounts.filter(a => a.id !== accountId).map(acc => (
+                    {accounts.filter(a => a.id !== accountId && (type === 'transfer' || a.type === 'investment')).map(acc => (
                       <option key={acc.id} value={acc.id}>
                         {acc.name} ({acc.type === 'bank' ? 'Banka' : acc.type === 'credit_card' ? 'Kredi Kartı' : acc.type === 'investment' ? 'Birikim' : 'Nakit'})
                       </option>
                     ))}
                   </select>
-                  {targetAccountId && (
-                    <button type="button" onClick={() => handleEditSelectedAccount(targetAccountId)} className="p-2 text-muted hover:text-primary bg-white border border-gray-200 rounded flex-shrink-0" title="Seçili Hesabın Adını Düzenle">
-                      <Edit2 size={18} />
-                    </button>
-                  )}
-                </div>
-              <p className="text-xs text-primary mt-1">Örn: Nakit hesaptan Kredi Kartı seçilirse borç ödenmiş olur.</p>
+              </div>
+            </div>
+          )}
+
+          {['debt_given', 'debt_taken', 'debt_collection', 'debt_payment'].includes(type) && (
+            <div className="form-group p-3 rounded-lg mt-2" style={{ backgroundColor: '#FFFBEB', border: '1px solid #FDE68A' }}>
+              <label className="form-label text-yellow-800">Para Birimi / Varlık Türü (Opsiyonel)</label>
+              <select value={assetType} onChange={e => setAssetType(e.target.value)} className="form-input text-sm">
+                <option value="TL">TL (Türk Lirası)</option>
+                <option value="ALTIN">Altın (Gram)</option>
+                <option value="USD">USD (Dolar)</option>
+                <option value="EUR">EUR (Euro)</option>
+                <option value="GÜMÜŞ">Gümüş (Gram)</option>
+              </select>
+            </div>
+          )}
+
+          {((['investment_buy', 'investment_sell'].includes(type)) || (['debt_given', 'debt_taken', 'debt_collection', 'debt_payment'].includes(type) && assetType !== 'TL')) && (
+            <div className="flex gap-4 p-3 rounded-lg mt-2 mb-2" style={{ backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0' }}>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label className="form-label text-green-800">Miktar {assetType !== 'TL' && type.includes('debt') ? `(${assetType})` : '(Gram/Adet)'}</label>
+                <input 
+                  type="number" 
+                  step="0.01" 
+                  placeholder="Örn: 10.5" 
+                  value={assetAmount} 
+                  onChange={e => {
+                    setAssetAmount(e.target.value);
+                    if (e.target.value && assetRate) setAmount((parseFloat(e.target.value) * parseFloat(assetRate)).toString());
+                  }} 
+                  className="form-input" 
+                  required 
+                />
+              </div>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label className="form-label text-green-800">İşlem Kuru (Birim Fiyat)</label>
+                <input 
+                  type="number" 
+                  step="0.01" 
+                  placeholder="Örn: 3000" 
+                  value={assetRate} 
+                  onChange={e => {
+                    setAssetRate(e.target.value);
+                    if (e.target.value && assetAmount) setAmount((parseFloat(e.target.value) * parseFloat(assetAmount)).toString());
+                  }} 
+                  className="form-input" 
+                  required 
+                />
+              </div>
             </div>
           )}
 

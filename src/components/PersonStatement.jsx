@@ -318,6 +318,9 @@ openPdfTable(`${personData.name} Ekstresi`, accountTransactions, totalAmountCalc
                           <p className={`font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
                             {isPositive ? '+' : '-'}{formatMoney(t.amount)}
                           </p>
+                          {t.assetType && t.assetType !== 'TL' && (
+                            <p className="text-xs text-muted mt-1">{t.assetAmount} {t.assetType} (Kur: {t.assetRate})</p>
+                          )}
                         </div>
                         {(currentUser?.role === 'admin' || t.addedBy === currentUser?.id) && (
                           <>

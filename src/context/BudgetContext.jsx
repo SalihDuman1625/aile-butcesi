@@ -290,19 +290,41 @@ export const BudgetProvider = ({ children }) => {
   // Yeni Cari (Borç/Alacak) Sistemi
   const getDebts = () => {
     const debtMap = {};
+    const currentRates = {};
+    const fallbackRates = {};
+
+    accounts.filter(a => a.type === 'investment').forEach(a => {
+      if (a.assetType && a.assetType !== 'TL') {
+        currentRates[a.assetType] = parseFloat(a.assetRate || 0);
+      }
+    });
+
+    transactions.forEach(t => {
+      if (t.assetType && t.assetType !== 'TL' && t.assetRate) {
+        if (!fallbackRates[t.assetType] || new Date(t.date) >= new Date(fallbackRates[t.assetType].date)) {
+          fallbackRates[t.assetType] = { rate: parseFloat(t.assetRate), date: t.date };
+        }
+      }
+    });
 
     transactions.forEach(t => {
       if (['debt_given', 'debt_taken', 'debt_payment', 'debt_collection'].includes(t.type)) {
         const p = t.person || 'Bilinmeyen';
         if (!debtMap[p]) {
-          debtMap[p] = { person: p, netAmount: 0, latestDueDate: null, transactions: [] };
+          debtMap[p] = { person: p, netAmount: 0, assets: {}, latestDueDate: null, transactions: [] };
         }
         
-        if (t.type === 'debt_given') debtMap[p].netAmount += parseFloat(t.amount); // they owe me (+)
-        if (t.type === 'debt_taken') debtMap[p].netAmount -= parseFloat(t.amount); // I owe them (-)
-        if (t.type === 'debt_collection') debtMap[p].netAmount -= parseFloat(t.amount); // they owe me less
-        if (t.type === 'debt_payment') debtMap[p].netAmount += parseFloat(t.amount); // I owe them less
-        
+        const aType = t.assetType || 'TL';
+        const aAmt = parseFloat(t.assetAmount || t.amount || 0);
+        if (!debtMap[p].assets[aType]) debtMap[p].assets[aType] = 0;
+
+        let isPositive = (t.type === 'debt_given' || t.type === 'debt_payment');
+        if (isPositive) {
+           debtMap[p].assets[aType] += aAmt;
+        } else {
+           debtMap[p].assets[aType] -= aAmt;
+        }
+
         debtMap[p].transactions.push(t);
         
         if (t.dueDate && (t.type === 'debt_given' || t.type === 'debt_taken')) {
@@ -313,7 +335,24 @@ export const BudgetProvider = ({ children }) => {
       }
     });
 
-    return Object.values(debtMap).filter(d => Math.abs(d.netAmount) > 0.01);
+    Object.values(debtMap).forEach(d => {
+      let totalTL = 0;
+      Object.keys(d.assets).forEach(aType => {
+        const aAmt = d.assets[aType];
+        if (aType === 'TL') {
+          totalTL += aAmt;
+        } else {
+          const rate = currentRates[aType] || (fallbackRates[aType] ? fallbackRates[aType].rate : 1);
+          totalTL += (aAmt * rate);
+        }
+      });
+      d.netAmount = totalTL;
+    });
+
+    return Object.values(debtMap).filter(d => {
+      const hasNonZeroAsset = Object.values(d.assets).some(val => Math.abs(val) > 0.001);
+      return Math.abs(d.netAmount) > 0.01 || hasNonZeroAsset;
+    });
   };
 
   const getFilteredTransactions = ({ dateRange, category, person, type, startDate, endDate }) => {

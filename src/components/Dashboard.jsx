@@ -267,6 +267,13 @@ const Dashboard = ({ onEditTransaction }) => {
                     {isAccountList && item.type === 'investment' && item.assetType !== 'TL' && (
                       <p className="text-xs text-primary font-semibold mt-1">
                         {item.assetAmount} {item.assetType} (Birim: {formatMoney(item.assetRate)})
+                          {!isAccountList && item.assets && Object.keys(item.assets).some(a => Math.abs(item.assets[a]) > 0.001) && (
+                            <p className="text-xs text-primary font-semibold mt-1">
+                              Bakiye: {Object.keys(item.assets).filter(aType => Math.abs(item.assets[aType]) > 0.001).map(aType => (
+                                <span key={aType} className="mr-2">{item.assets[aType] > 0 ? '+' : '-'}{Math.abs(item.assets[aType])} {aType}</span>
+                              ))}
+                            </p>
+                          )}
                       </p>
                     )}
                     {!isAccountList && (
