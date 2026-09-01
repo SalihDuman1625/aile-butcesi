@@ -53,8 +53,8 @@ const Charts = ({ onOpenForm }) => {
   const categoryMap = {};
 
   filteredTxs.forEach(t => {
-    if (t.type === \'income\') totalIncome += parseFloat(t.amount);
-    if (t.type === \'expense\') {
+    if (t.type === 'income') totalIncome += parseFloat(t.amount);
+    if (t.type === 'expense') {
         totalExpense += parseFloat(t.amount);
       categoryMap[t.category] = (categoryMap[t.category] || 0) + parseFloat(t.amount);
     }
@@ -91,8 +91,7 @@ const Charts = ({ onOpenForm }) => {
   };
 
   const exportToCSV = () => {
-    let csv = 'Tarih;Kategori;Islem Turu;Kisi;Aciklama;Tutar
-';
+    let csv = 'Tarih;Kategori;Islem Turu;Kisi;Aciklama;Tutar\n';
     filteredTxs.forEach(t => {
       const typeStr = t.type === 'expense' ? 'Gider' : t.type === 'income' ? 'Gelir' : t.type === 'transfer' ? 'Transfer' : t.type === 'debt_given' ? 'Borc Verildi' : 'Borc Alindi';
       const amountStr = t.amount.toString().replace('.', ','); // Tutar noktasını virgüle çevir (Excel Türkçe için)
