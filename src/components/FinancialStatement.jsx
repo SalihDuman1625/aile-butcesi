@@ -170,9 +170,9 @@ const FinancialStatement = ({ onClose, dateRange, filteredTransactions }) => {
                   <div key={r.name} className="flex justify-between py-1 pl-4 text-xs text-muted border-b border-gray-100">
                     <span>
                       {r.name}
-                      {r.assets && Object.keys(r.assets).some(a => Math.abs(r.assets[a]) > 0.001) && (
+                      {r.assets && Object.keys(r.assets).some(a => a !== 'TL' && Math.abs(r.assets[a]) > 0.001) && (
                         <span className="ml-2 text-[10px] text-primary">
-                          ({Object.keys(r.assets).filter(a => Math.abs(r.assets[a]) > 0.001).map(a => `${r.assets[a] > 0 ? '+' : ''}${r.assets[a]} ${a}`).join(', ')})
+                          ({Object.keys(r.assets).filter(a => a !== 'TL' && Math.abs(r.assets[a]) > 0.001).map(a => `${r.assets[a] > 0 ? '+' : ''}${r.assets[a]} ${a}`).join(', ')})
                         </span>
                       )}
                     </span>
@@ -210,9 +210,9 @@ const FinancialStatement = ({ onClose, dateRange, filteredTransactions }) => {
                   <div key={p.name} className="flex justify-between py-1 pl-4 text-xs text-muted border-b border-gray-100">
                     <span>
                       {p.name}
-                      {p.assets && Object.keys(p.assets).some(a => Math.abs(p.assets[a]) > 0.001) && (
+                      {p.assets && Object.keys(p.assets).some(a => a !== 'TL' && Math.abs(p.assets[a]) > 0.001) && (
                         <span className="ml-2 text-[10px] text-primary">
-                          ({Object.keys(p.assets).filter(a => Math.abs(p.assets[a]) > 0.001).map(a => `${p.assets[a] < 0 ? '' : '+'}${p.assets[a]} ${a}`).join(', ')})
+                          ({Object.keys(p.assets).filter(a => a !== 'TL' && Math.abs(p.assets[a]) > 0.001).map(a => `${p.assets[a] < 0 ? '' : '+'}${p.assets[a]} ${a}`).join(', ')})
                         </span>
                       )}
                     </span>
