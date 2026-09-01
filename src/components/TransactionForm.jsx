@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useBudget } from '../context/BudgetContext';
-import { X } from 'lucide-react';
+import { X, Edit2 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 const DEFAULT_CATEGORIES = {
@@ -31,7 +31,7 @@ const formatAmountDisplay = (val) => {
 };
 
 const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
-  const { addTransaction, editTransaction, transactions, accounts, addAccount, addBill } = useBudget();
+  const { addTransaction, editTransaction, transactions, accounts, addAccount, editAccount, addBill } = useBudget();
   
   const [type, setType] = useState('expense');
   const [title, setTitle] = useState('');
@@ -56,6 +56,16 @@ const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
   const [showQuickAccount, setShowQuickAccount] = useState(false);
   const [quickAccountName, setQuickAccountName] = useState('');
   const [quickAccountType, setQuickAccountType] = useState('bank');
+
+  
+  const handleEditSelectedAccount = (id) => {
+    const acc = accounts.find(a => a.id === id);
+    if (!acc) return;
+    const newName = window.prompt("Hesap adını düzeltin:", acc.name);
+    if (newName && newName.trim() !== '' && newName !== acc.name) {
+      editAccount(id, { ...acc, name: newName.trim() });
+    }
+  };
 
   const handleQuickAddAccount = () => {
     if (!quickAccountName.trim()) return;
@@ -338,38 +348,52 @@ const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
                 </div>
               </div>
             ) : (
-              <select 
-                value={accountId} 
-                onChange={e => setAccountId(e.target.value)} 
-                className="form-input"
-                required
-              >
-                {accounts.length === 0 && <option value="">Önce hesap ekleyin</option>}
-                {accounts.map(acc => (
-                  <option key={acc.id} value={acc.id}>
-                    {acc.name} ({acc.type === 'bank' ? 'Banka' : acc.type === 'credit_card' ? 'Kredi Kartı' : acc.type === 'investment' ? 'Birikim' : 'Nakit'})
-                  </option>
-                ))}
-              </select>
-            )}
+                <div className="flex gap-2 items-center w-full">
+                  <select 
+                    value={accountId} 
+                    onChange={e => setAccountId(e.target.value)} 
+                    className="form-input flex-1"
+                    required
+                  >
+                    {accounts.length === 0 && <option value="">Önce hesap ekleyin</option>}
+                    {accounts.map(acc => (
+                      <option key={acc.id} value={acc.id}>
+                        {acc.name} ({acc.type === 'bank' ? 'Banka' : acc.type === 'credit_card' ? 'Kredi Kartı' : acc.type === 'investment' ? 'Birikim' : 'Nakit'})
+                      </option>
+                    ))}
+                  </select>
+                  {accountId && (
+                    <button type="button" onClick={() => handleEditSelectedAccount(accountId)} className="p-2 text-muted hover:text-primary bg-gray-100 rounded flex-shrink-0" title="Seçili Hesabın Adını Düzenle">
+                      <Edit2 size={18} />
+                    </button>
+                  )}
+                </div>
+              )}
           </div>
 
           {type === 'transfer' && (
             <div className="form-group p-3 rounded-lg" style={{ backgroundColor: '#EEF2FF', border: '1px solid #C7D2FE' }}>
               <label className="form-label text-primary">Hedef Hesap (Para Nereye Gidecek?)</label>
-              <select 
-                value={targetAccountId} 
-                onChange={e => setTargetAccountId(e.target.value)} 
-                className="form-input"
-                required
-              >
-                <option value="">Seçiniz</option>
-                {accounts.filter(a => a.id !== accountId).map(acc => (
-                  <option key={acc.id} value={acc.id}>
-                    {acc.name} ({acc.type === 'bank' ? 'Banka' : acc.type === 'credit_card' ? 'Kredi Kartı' : acc.type === 'investment' ? 'Birikim' : 'Nakit'})
-                  </option>
-                ))}
-              </select>
+              <div className="flex gap-2 items-center w-full">
+                  <select 
+                    value={targetAccountId} 
+                    onChange={e => setTargetAccountId(e.target.value)} 
+                    className="form-input flex-1"
+                    required
+                  >
+                    <option value="">Seçiniz</option>
+                    {accounts.filter(a => a.id !== accountId).map(acc => (
+                      <option key={acc.id} value={acc.id}>
+                        {acc.name} ({acc.type === 'bank' ? 'Banka' : acc.type === 'credit_card' ? 'Kredi Kartı' : acc.type === 'investment' ? 'Birikim' : 'Nakit'})
+                      </option>
+                    ))}
+                  </select>
+                  {targetAccountId && (
+                    <button type="button" onClick={() => handleEditSelectedAccount(targetAccountId)} className="p-2 text-muted hover:text-primary bg-white border border-gray-200 rounded flex-shrink-0" title="Seçili Hesabın Adını Düzenle">
+                      <Edit2 size={18} />
+                    </button>
+                  )}
+                </div>
               <p className="text-xs text-primary mt-1">Örn: Nakit hesaptan Kredi Kartı seçilirse borç ödenmiş olur.</p>
             </div>
           )}
