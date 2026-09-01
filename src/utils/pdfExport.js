@@ -10,21 +10,25 @@ export const openPdfTable = (title, transactions, totalAmount) => {
     const cat = t.category || '';
     
     let amountStr = '';
+    let amountColor = '#334155'; // default dark gray
+    
     // Determine sign if needed, or just show amount
     if (t.type === 'expense' || t.type === 'debt_given') {
       amountStr = '-' + formatMoney(t.amount);
+      amountColor = '#e11d48'; // elegant red
     } else if (t.type === 'income' || t.type === 'debt_taken') {
       amountStr = '+' + formatMoney(t.amount);
+      amountColor = '#059669'; // elegant green
     } else {
       amountStr = formatMoney(t.amount);
     }
 
     tableRows += `
       <tr>
-        <td>${d}</td>
+        <td class="date-col">${d}</td>
         <td>${tTitle}</td>
-        <td>${cat}</td>
-        <td style="text-align:right;">${amountStr}</td>
+        <td class="cat-col">${cat}</td>
+        <td style="text-align:right; font-weight:500; color:${amountColor};">${amountStr}</td>
       </tr>
     `;
   });
@@ -35,34 +39,105 @@ export const openPdfTable = (title, transactions, totalAmount) => {
     <head>
       <meta charset="UTF-8">
       <title>${title}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
       <style>
-        body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-        h1 { text-align: center; color: #1e293b; margin-bottom: 5px; }
-        .date { text-align: center; color: #64748b; font-size: 14px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; }
-        th { background-color: #f1f5f9; padding: 12px; text-align: left; border-bottom: 2px solid #cbd5e1; font-weight: bold; }
-        td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
-        tr:nth-child(even) { background-color: #f8fafc; }
-        .total-row { font-weight: bold; font-size: 16px; background-color: #e2e8f0; }
-        .total-row td { border-top: 2px solid #94a3b8; padding: 15px 12px; }
+        body { 
+          font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+          padding: 30px 40px; 
+          color: #334155; 
+          background-color: #fff;
+          margin: 0;
+        }
+        .header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          border-bottom: 2px solid #0f172a;
+          padding-bottom: 12px;
+          margin-bottom: 24px;
+        }
+        h1 { 
+          color: #0f172a; 
+          margin: 0; 
+          font-size: 22px;
+          font-weight: 600;
+          letter-spacing: -0.5px;
+        }
+        .date { 
+          color: #64748b; 
+          font-size: 12px; 
+          font-weight: 500;
+        }
+        table { 
+          width: 100%; 
+          border-collapse: collapse; 
+          font-size: 12px; 
+        }
+        th { 
+          text-align: left; 
+          padding: 8px 4px;
+          color: #475569;
+          font-weight: 600;
+          text-transform: uppercase;
+          font-size: 10px;
+          letter-spacing: 0.5px;
+          border-bottom: 1px solid #cbd5e1;
+        }
+        td { 
+          padding: 10px 4px; 
+          border-bottom: 1px solid #f1f5f9; 
+          color: #1e293b;
+        }
+        tr:last-child td {
+          border-bottom: none;
+        }
+        .date-col { color: #64748b; font-variant-numeric: tabular-nums; }
+        .cat-col { color: #64748b; font-size: 11px; }
+        
+        .total-row { 
+          font-weight: 600; 
+          font-size: 14px; 
+        }
+        .total-row td { 
+          border-top: 1px solid #0f172a; 
+          padding-top: 16px;
+          border-bottom: none;
+        }
         
         @media print {
           @page { margin: 1cm; }
           body { padding: 0; }
-          .print-btn { display: none; }
+          .print-btn { display: none !important; }
         }
         
-        .header-actions { display: flex; justify-content: flex-end; margin-bottom: 20px; }
-        .print-btn { background-color: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
-        .print-btn:hover { background-color: #2563eb; }
+        .print-btn { 
+          position: fixed;
+          top: 20px;
+          right: 30px;
+          background-color: #0f172a; 
+          color: white; 
+          border: none; 
+          padding: 10px 20px; 
+          border-radius: 6px; 
+          cursor: pointer; 
+          font-weight: 500; 
+          font-size: 13px; 
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          transition: all 0.2s;
+        }
+        .print-btn:hover { 
+          background-color: #334155;
+          transform: translateY(-1px);
+        }
       </style>
     </head>
     <body>
-      <div class="header-actions print-btn">
-        <button class="print-btn" onclick="window.print()">YAZDIR / PDF OLARAK KAYDET</button>
+      <button class="print-btn" onclick="window.print()">🖨️ YAZDIR / PDF İNDİR</button>
+      
+      <div class="header">
+        <h1>${title}</h1>
+        <div class="date">Oluşturulma Tarihi: ${new Date().toLocaleDateString('tr-TR')}</div>
       </div>
-      <h1>${title}</h1>
-      <div class="date">Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}</div>
       
       <table>
         <thead>
@@ -76,8 +151,8 @@ export const openPdfTable = (title, transactions, totalAmount) => {
         <tbody>
           ${tableRows}
           <tr class="total-row">
-            <td colspan="3" style="text-align:right;">GENEL TOPLAM:</td>
-            <td style="text-align:right; color:#0f172a;">${formatMoney(totalAmount)}</td>
+            <td colspan="3" style="text-align:right; color:#64748b; font-size:12px;">GENEL TOPLAM:</td>
+            <td style="text-align:right; color:#0f172a; font-size:16px;">${formatMoney(totalAmount)}</td>
           </tr>
         </tbody>
       </table>
