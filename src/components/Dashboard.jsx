@@ -70,57 +70,12 @@ const Dashboard = ({ onEditTransaction }) => {
   const currentMonthIncome = currentMonthTxs.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
   const currentMonthExpense = currentMonthTxs.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
 
-  const defaultWidgetOrder = ['bank', 'cash', 'cc', 'inv', 'rec', 'debt', 'income', 'expense'];
-  const [widgetOrder, setWidgetOrder] = useState(() => {
-    try {
-      const saved = localStorage.getItem('dashboardWidgetOrder');
-      if (saved) {
-        let parsed = JSON.parse(saved);
-        if (!parsed.includes('income')) parsed.push('income');
-        if (!parsed.includes('expense')) parsed.push('expense');
-        return parsed;
-      }
-    } catch(e) {}
-    return defaultWidgetOrder;
-  });
+  const widgetOrder = ['bank', 'cash', 'inv', 'rec', 'cc', 'debt', 'income', 'expense'];
 
-  const dragItem = React.useRef(null);
-  const dragOverItem = React.useRef(null);
-
-  const saveWidgetOrder = (newOrder) => {
-    setWidgetOrder(newOrder);
-    localStorage.setItem('dashboardWidgetOrder', JSON.stringify(newOrder));
-  };
-
-  const handleDragStart = (e, position) => {
-    dragItem.current = position;
-    e.currentTarget.style.opacity = '0.5';
-  };
-
-  const handleDragEnter = (e, position) => {
-    dragOverItem.current = position;
-  };
-
-  const handleDragEnd = (e) => {
-    e.currentTarget.style.opacity = '1';
-    if (dragItem.current === null || dragOverItem.current === null) return;
-    
-    const newOrder = [...widgetOrder];
-    const draggedItemContent = newOrder[dragItem.current];
-    
-    newOrder.splice(dragItem.current, 1);
-    newOrder.splice(dragOverItem.current, 0, draggedItemContent);
-    
-    dragItem.current = null;
-    dragOverItem.current = null;
-    
-    saveWidgetOrder(newOrder);
-  };
-
-  const renderWidget = (id, idx) => {
+  const renderWidget = (id) => {
     switch(id) {
       case 'bank': return (
-          <div key="bank" draggable onDragStart={(e) => handleDragStart(e, idx)} onDragEnter={(e) => handleDragEnter(e, idx)} onDragEnd={handleDragEnd} onDragOver={(e) => e.preventDefault()} className="widget-box widget-bank cursor-move" onClick={() => setActiveWidget('bank')}>
+          <div key="bank" className="widget-box widget-bank " onClick={() => setActiveWidget('bank')}>
             <div className="widget-header">
               <div className="widget-icon"><Building size={16} /></div>
               <span className="widget-title">Banka</span>
@@ -129,7 +84,7 @@ const Dashboard = ({ onEditTransaction }) => {
           </div>
       );
       case 'cash': return (
-          <div key="cash" draggable onDragStart={(e) => handleDragStart(e, idx)} onDragEnter={(e) => handleDragEnter(e, idx)} onDragEnd={handleDragEnd} onDragOver={(e) => e.preventDefault()} className="widget-box widget-cash cursor-move" onClick={() => setActiveWidget('cash')}>
+          <div key="cash" className="widget-box widget-cash " onClick={() => setActiveWidget('cash')}>
             <div className="widget-header">
               <div className="widget-icon"><Coins size={16} /></div>
               <span className="widget-title">Nakit Kasa</span>
@@ -138,7 +93,7 @@ const Dashboard = ({ onEditTransaction }) => {
           </div>
       );
       case 'cc': return (
-          <div key="cc" draggable onDragStart={(e) => handleDragStart(e, idx)} onDragEnter={(e) => handleDragEnter(e, idx)} onDragEnd={handleDragEnd} onDragOver={(e) => e.preventDefault()} className="widget-box widget-cc cursor-move" onClick={() => setActiveWidget('cc')}>
+          <div key="cc" className="widget-box widget-cc " onClick={() => setActiveWidget('cc')}>
             <div className="widget-header">
               <div className="widget-icon"><CreditCard size={16} /></div>
               <span className="widget-title">Kredi Kartı</span>
@@ -147,7 +102,7 @@ const Dashboard = ({ onEditTransaction }) => {
           </div>
       );
       case 'inv': return (
-          <div key="inv" draggable onDragStart={(e) => handleDragStart(e, idx)} onDragEnter={(e) => handleDragEnter(e, idx)} onDragEnd={handleDragEnd} onDragOver={(e) => e.preventDefault()} className="widget-box widget-inv cursor-move" onClick={() => setActiveWidget('inv')}>
+          <div key="inv" className="widget-box widget-inv " onClick={() => setActiveWidget('inv')}>
             <div className="widget-header">
               <div className="widget-icon"><Landmark size={16} /></div>
               <span className="widget-title">Birikimler</span>
@@ -156,7 +111,7 @@ const Dashboard = ({ onEditTransaction }) => {
           </div>
       );
       case 'rec': return (
-          <div key="rec" draggable onDragStart={(e) => handleDragStart(e, idx)} onDragEnter={(e) => handleDragEnter(e, idx)} onDragEnd={handleDragEnd} onDragOver={(e) => e.preventDefault()} className="widget-box widget-rec cursor-move" onClick={() => setActiveWidget('receivables')}>
+          <div key="rec" className="widget-box widget-rec " onClick={() => setActiveWidget('receivables')}>
             <div className="widget-header">
               <div className="widget-icon"><HandCoins size={16} /></div>
               <span className="widget-title">Alacaklarım</span>
@@ -165,7 +120,7 @@ const Dashboard = ({ onEditTransaction }) => {
           </div>
       );
       case 'debt': return (
-        <div key="debt" draggable onDragStart={(e) => handleDragStart(e, idx)} onDragEnter={(e) => handleDragEnter(e, idx)} onDragEnd={handleDragEnd} onDragOver={(e) => e.preventDefault()} className="widget-box widget-debt cursor-move" onClick={() => setActiveWidget('debts')}>
+        <div key="debt" className="widget-box widget-debt " onClick={() => setActiveWidget('debts')}>
           <div className="widget-header">
             <div className="widget-icon"><Handshake size={16} /></div>
             <span className="widget-title">Borçlarım</span>
@@ -174,7 +129,7 @@ const Dashboard = ({ onEditTransaction }) => {
         </div>
       );
       case 'income': return (
-        <div key="income" draggable onDragStart={(e) => handleDragStart(e, idx)} onDragEnter={(e) => handleDragEnter(e, idx)} onDragEnd={handleDragEnd} onDragOver={(e) => e.preventDefault()} className="widget-box widget-income cursor-move" onClick={() => setSelectedIncomeExpenseForStatement('income')}>
+        <div key="income" className="widget-box widget-income " onClick={() => setSelectedIncomeExpenseForStatement('income')}>
           <div className="widget-header">
             <div className="widget-icon"><TrendingUp size={16} /></div>
             <span className="widget-title">Gelirler (Bu Ay)</span>
@@ -183,7 +138,7 @@ const Dashboard = ({ onEditTransaction }) => {
         </div>
       );
       case 'expense': return (
-        <div key="expense" draggable onDragStart={(e) => handleDragStart(e, idx)} onDragEnter={(e) => handleDragEnter(e, idx)} onDragEnd={handleDragEnd} onDragOver={(e) => e.preventDefault()} className="widget-box widget-expense cursor-move" onClick={() => setSelectedIncomeExpenseForStatement('expense')}>
+        <div key="expense" className="widget-box widget-expense " onClick={() => setSelectedIncomeExpenseForStatement('expense')}>
           <div className="widget-header">
             <div className="widget-icon"><TrendingDown size={16} /></div>
             <span className="widget-title">Giderler (Bu Ay)</span>
@@ -306,7 +261,7 @@ const Dashboard = ({ onEditTransaction }) => {
         </div>
 
         {/* Small Widgets */}
-        {widgetOrder.map((id, index) => renderWidget(id, index))}
+        {widgetOrder.map((id) => renderWidget(id))}
       </div>
 
       {/* Upcoming Bills Alert */}
