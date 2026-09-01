@@ -353,10 +353,10 @@ const PersonStatement = ({ personData, onClose, onOpenForm }) => {
                         </div>
                         {(currentUser?.role === 'admin' || t.addedBy === currentUser?.id) && (
                           <>
-                            <button onClick={() => onOpenForm && onOpenForm(t)} className="text-muted ml-2 hover:text-primary" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                            <button className="hide-on-print" onClick={() => onOpenForm && onOpenForm(t)} className="text-muted ml-2 hover:text-primary" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                               <Edit2 size={16} />
                             </button>
-                            <button onClick={() => deleteTransaction(t.id)} className="text-danger ml-1 hover:text-red-700" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                            <button className="hide-on-print" onClick={() => deleteTransaction(t.id)} className="text-danger ml-1 hover:text-red-700" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                               <Trash2 size={16} />
                             </button>
                           </>
@@ -365,6 +365,21 @@ const PersonStatement = ({ personData, onClose, onOpenForm }) => {
                     </div>
                 );
               })}
+            </div>
+          )}
+
+          {personTransactions.length > 0 && (
+            <div className="mt-4 p-4 rounded-lg bg-gray-50 flex justify-between items-center border border-gray-200 print-only" style={{ display: 'none' }}>
+              <span className="font-bold text-gray-700">Dönem İçi Toplam Değişim:</span>
+              <span className="font-bold text-xl text-primary">
+                {formatMoney(
+                  personTransactions.reduce((acc, t) => {
+                    let isDebtToMe = false;
+                    if (t.type === 'debt_given' || t.type === 'debt_payment') isDebtToMe = true;
+                    return acc + (isDebtToMe ? t.amount : -t.amount);
+                  }, 0)
+                )}
+              </span>
             </div>
           )}
         </div>

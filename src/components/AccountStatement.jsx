@@ -143,7 +143,7 @@ const AccountStatement = ({ account, onClose, onOpenForm }) => {
         </div>
 
         {/* Mutabakat (Reconciliation) Section */}
-        <div className="p-4 bg-[var(--bg-color)] border-b border-[var(--border-color)]">
+        <div className="p-4 bg-[var(--bg-color)] border-b border-[var(--border-color)] hide-on-print">
           <div className="flex justify-between items-center mb-4">
             <div>
               <p className="text-xs text-muted mb-1">Uygulamadaki Bakiye</p>
@@ -243,10 +243,10 @@ const AccountStatement = ({ account, onClose, onOpenForm }) => {
                       </div>
                       {(currentUser?.role === 'admin' || t.addedBy === currentUser?.id) && (
                         <>
-                          <button onClick={() => onOpenForm && onOpenForm(t)} className="text-muted ml-2 hover:text-primary" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                          <button className="hide-on-print" onClick={() => onOpenForm && onOpenForm(t)} className="text-muted ml-2 hover:text-primary" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                             <Edit2 size={16} />
                           </button>
-                          <button onClick={() => deleteTransaction(t.id)} className="text-danger ml-1 hover:text-red-700" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                          <button className="hide-on-print" onClick={() => deleteTransaction(t.id)} className="text-danger ml-1 hover:text-red-700" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                             <Trash2 size={16} />
                           </button>
                         </>
@@ -255,6 +255,22 @@ const AccountStatement = ({ account, onClose, onOpenForm }) => {
                   </div>
               );
             })
+          )}
+
+          {accountTransactions.length > 0 && (
+            <div className="mt-4 p-4 rounded-lg bg-gray-50 flex justify-between items-center border border-gray-200 print-only" style={{ display: 'none' }}>
+              <span className="font-bold text-gray-700">Dönem İçi Toplam Değişim:</span>
+              <span className="font-bold text-xl text-primary">
+                {formatMoney(
+                  accountTransactions.reduce((acc, t) => {
+                    let isIncoming = false;
+                    if (t.type === 'income' || t.type === 'debt_taken') isIncoming = true;
+                    if (t.type === 'transfer' && t.targetAccountId === account.id) isIncoming = true;
+                    return acc + (isIncoming ? t.amount : -t.amount);
+                  }, 0)
+                )}
+              </span>
+            </div>
           )}
         </div>
       </div>
