@@ -249,7 +249,7 @@ const PersonStatement = ({ personData, onClose, onOpenForm }) => {
             </button>
             <button onClick={() => {
 const totalAmountCalc = personTransactions.reduce((acc, t) => { let isDebtToMe = false; if (t.type === 'debt_given' || t.type === 'debt_payment') isDebtToMe = true; return acc + (isDebtToMe ? t.amount : -t.amount); }, 0);
-openPdfTable('Kişi Ekstresi', personTransactions, totalAmountCalc);
+openPdfTable(`${personData.name} Ekstresi`, personTransactions, totalAmountCalc);
 }} title="Yazdır / PDF Al" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-primary">
               <Printer size={20} />
             </button>

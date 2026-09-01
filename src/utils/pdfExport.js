@@ -43,7 +43,7 @@ export const openPdfTable = (title, transactions, totalAmount) => {
       <style>
         body { 
           font-family: 'Inter', system-ui, -apple-system, sans-serif; 
-          padding: 30px 40px; 
+          padding: 20px 30px; 
           color: #334155; 
           background-color: #fff;
           margin: 0;
@@ -54,7 +54,7 @@ export const openPdfTable = (title, transactions, totalAmount) => {
           align-items: flex-end;
           border-bottom: 2px solid #0f172a;
           padding-bottom: 12px;
-          margin-bottom: 24px;
+          margin-bottom: 16px;
         }
         h1 { 
           color: #0f172a; 
@@ -65,17 +65,17 @@ export const openPdfTable = (title, transactions, totalAmount) => {
         }
         .date { 
           color: #64748b; 
-          font-size: 12px; 
+          font-size: 11.5px; 
           font-weight: 500;
         }
         table { 
           width: 100%; 
           border-collapse: collapse; 
-          font-size: 12px; 
+          font-size: 11.5px; 
         }
         th { 
           text-align: left; 
-          padding: 8px 4px;
+          padding: 6px 4px;
           color: #475569;
           font-weight: 600;
           text-transform: uppercase;
@@ -84,7 +84,7 @@ export const openPdfTable = (title, transactions, totalAmount) => {
           border-bottom: 1px solid #cbd5e1;
         }
         td { 
-          padding: 10px 4px; 
+          padding: 5px 4px; 
           border-bottom: 1px solid #f1f5f9; 
           color: #1e293b;
         }

@@ -124,7 +124,7 @@ const IncomeExpenseStatement = ({ type, monthIndex, year, onClose, onOpenForm })
             </button>
             <button onClick={() => {
 const totalAmountCalc = filteredTransactions.reduce((acc, t) => acc + t.amount, 0);
-openPdfTable('Gelir/Gider Raporu', filteredTransactions, totalAmountCalc);
+openPdfTable(type === 'income' ? 'Gelir Raporu' : 'Gider Raporu', filteredTransactions, totalAmountCalc);
 }} title="Yazdır / PDF Al" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-primary">
               <Printer size={20} />
             </button>

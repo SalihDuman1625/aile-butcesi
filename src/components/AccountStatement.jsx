@@ -135,7 +135,7 @@ const AccountStatement = ({ account, onClose, onOpenForm }) => {
             </button>
             <button onClick={() => {
 const totalAmountCalc = accountTransactions.reduce((acc, t) => { let isIncoming = false; if (t.type === 'income' || t.type === 'debt_taken' || (t.type === 'transfer' && t.targetAccountId === account.id)) isIncoming = true; return acc + (isIncoming ? t.amount : -t.amount); }, 0);
-openPdfTable('Hesap Ekstresi', accountTransactions, totalAmountCalc);
+openPdfTable(`${account.name} Ekstresi`, accountTransactions, totalAmountCalc);
 }} title="Yazdır / PDF Al" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-primary">
               <Printer size={20} />
             </button>
