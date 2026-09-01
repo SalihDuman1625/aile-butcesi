@@ -5,6 +5,10 @@ import { X, ShieldAlert, CheckCircle2, TrendingDown, TrendingUp, ArrowRightLeft,
 const AccountStatement = ({ account, onClose, onOpenForm }) => {
   const { transactions, addTransaction, editAccount, deleteTransaction, currentUser } = useBudget();
   const [actualBalance, setActualBalance] = useState('');
+  const [dateRange, setDateRange] = useState('Tüm Zamanlar');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
 
   useEffect(() => {
     document.body.classList.add('printing-modal');
@@ -13,10 +17,34 @@ const AccountStatement = ({ account, onClose, onOpenForm }) => {
   
   // Sadece bu hesaba ait işlemleri (Giren ve Çıkan) kronolojik sıraya göre listele (Yeniden eskiye)
   const accountTransactions = useMemo(() => {
-    return transactions
-      .filter(t => t.accountId === account.id || t.targetAccountId === account.id)
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
-  }, [transactions, account.id]);
+          return transactions.filter(t => {
+        if (!(t.accountId === account.id || t.targetAccountId === account.id)) return false;
+        
+        const tDate = new Date(t.date);
+        const now = new Date();
+        if (dateRange === 'Bu Ay') {
+          if (tDate.getMonth() !== now.getMonth() || tDate.getFullYear() !== now.getFullYear()) return false;
+        } else if (dateRange === 'Geçen Ay') {
+          const lastMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
+          const year = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+          if (tDate.getMonth() !== lastMonth || tDate.getFullYear() !== year) return false;
+        } else if (dateRange === 'Bu Yıl') {
+          if (tDate.getFullYear() !== now.getFullYear()) return false;
+        } else if (dateRange === 'Özel') {
+          if (startDate) {
+            const s = new Date(startDate);
+            s.setHours(0,0,0,0);
+            if (tDate < s) return false;
+          }
+          if (endDate) {
+            const e = new Date(endDate);
+            e.setHours(23,59,59,999);
+            if (tDate > e) return false;
+          }
+        }
+        return true;
+      }).sort((a, b) => new Date(b.date) - new Date(a.date));
+    }, [transactions, account.id, dateRange, startDate, endDate]);
 
   const appBalance = parseFloat(account.balance || 0);
   const userEnteredBalance = actualBalance ? parseFloat(actualBalance) : null;
@@ -76,6 +104,28 @@ const AccountStatement = ({ account, onClose, onOpenForm }) => {
           <div>
             <h2 className="text-xl font-bold">{account.name} Ekstresi</h2>
             <p className="text-sm text-muted">{account.type === 'bank' ? 'Banka Hesabı' : account.type === 'credit_card' ? 'Kredi Kartı' : 'Diğer Hesap'}</p>
+            <div className="flex flex-col md:flex-row gap-2 mt-2 hide-charts-on-print">
+              <select 
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value)}
+                className="border border-gray-300 rounded-md p-1 text-sm bg-white"
+              >
+                <option value="Bu Ay">Bu Ay</option>
+                <option value="Geçen Ay">Geçen Ay</option>
+                <option value="Bu Yıl">Bu Yıl</option>
+                <option value="Tüm Zamanlar">Tüm Zamanlar</option>
+                <option value="Özel">Özel Tarih Aralığı</option>
+              </select>
+              
+              {dateRange === 'Özel' && (
+                <div className="flex gap-2 items-center">
+                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="border border-gray-300 rounded-md p-1 text-sm bg-white" />
+                  <span className="text-xs text-muted">-</span>
+                  <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="border border-gray-300 rounded-md p-1 text-sm bg-white" />
+                </div>
+              )}
+            </div>
+
           </div>
           
           <div className="flex gap-2 items-center hide-charts-on-print">
