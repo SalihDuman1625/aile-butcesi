@@ -6,6 +6,30 @@ const BudgetContext = createContext();
 export const useBudget = () => useContext(BudgetContext);
 
 export const BudgetProvider = ({ children }) => {
+    const [exchangeRates, setExchangeRates] = useState(() => {
+    const saved = localStorage.getItem('budget_exchangeRates');
+    return saved ? JSON.parse(saved) : [
+      { id: '1', assetType: 'USD', rate: 34.00, lastUpdated: new Date().toISOString() },
+      { id: '2', assetType: 'EUR', rate: 38.00, lastUpdated: new Date().toISOString() },
+      { id: '3', assetType: 'ALTIN', rate: 2800.00, lastUpdated: new Date().toISOString() }
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('budget_exchangeRates', JSON.stringify(exchangeRates));
+  }, [exchangeRates]);
+
+  const updateExchangeRate = (assetType, newRate) => {
+    setExchangeRates(prev => {
+      const exists = prev.find(r => r.assetType === assetType);
+      if (exists) {
+        return prev.map(r => r.assetType === assetType ? { ...r, rate: parseFloat(newRate), lastUpdated: new Date().toISOString() } : r);
+      } else {
+        return [...prev, { id: Date.now().toString(), assetType, rate: parseFloat(newRate), lastUpdated: new Date().toISOString() }];
+      }
+    });
+  };
+
   const [transactions, setTransactions] = useState(() => {
     const saved = localStorage.getItem('budget_transactions');
     return saved ? JSON.parse(saved) : [];

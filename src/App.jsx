@@ -6,6 +6,8 @@ import Accounts from './components/Accounts';
 import BottomNav from './components/BottomNav';
 import TransactionForm from './components/TransactionForm';
 import Settings from './components/Settings';
+import ExchangeRates from './components/ExchangeRates';
+
 import ActivationGuard from './components/ActivationGuard';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -38,6 +40,8 @@ function App() {
               {activeTab === 'accounts' && <Accounts onOpenForm={handleOpenForm} />}
               {activeTab === 'charts' && <Charts onOpenForm={handleOpenForm} />}
               {activeTab === 'settings' && <Settings />}
+        {activeTab === 'rates' && <ExchangeRates />}
+
             </main>
 
             <BottomNav 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, PieChart, Plus, Wallet, Settings } from 'lucide-react';
+import { Home, PieChart, Plus, Wallet, Settings, TrendingUp } from 'lucide-react';
 
 const BottomNav = ({ activeTab, setActiveTab, onOpenForm }) => {
   return (
@@ -41,6 +41,14 @@ const BottomNav = ({ activeTab, setActiveTab, onOpenForm }) => {
         <span>Raporlar</span>
       </button>
 
+      
+      <button 
+        onClick={() => setActiveTab('rates')} 
+        className={`nav-item ${activeTab === 'rates' ? 'active' : ''}`}
+      >
+        <TrendingUp size={24} strokeWidth={activeTab === 'rates' ? 2.5 : 2} />
+        <span>Kurlar</span>
+      </button>
       <button 
         onClick={() => setActiveTab('settings')} 
         className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`}
