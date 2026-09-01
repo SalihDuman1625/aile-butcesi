@@ -7,6 +7,7 @@ import BottomNav from './components/BottomNav';
 import TransactionForm from './components/TransactionForm';
 import Settings from './components/Settings';
 import ActivationGuard from './components/ActivationGuard';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -27,34 +28,36 @@ function App() {
   };
 
   return (
-    <BudgetProvider>
-      <ActivationGuard>
-        <div className="w-full h-full min-h-screen relative">
-          
-          <main className="w-full">
-            {activeTab === 'dashboard' && <Dashboard onEditTransaction={handleOpenForm} onViewAll={() => setActiveTab('charts')} />}
-            {activeTab === 'accounts' && <Accounts onOpenForm={handleOpenForm} />}
-            {activeTab === 'charts' && <Charts onOpenForm={handleOpenForm} />}
-            {activeTab === 'settings' && <Settings />}
-          </main>
+    <ErrorBoundary>
+      <BudgetProvider>
+        <ActivationGuard>
+          <div className="w-full h-full min-h-screen relative">
+            
+            <main className="w-full">
+              {activeTab === 'dashboard' && <Dashboard onEditTransaction={handleOpenForm} onViewAll={() => setActiveTab('charts')} />}
+              {activeTab === 'accounts' && <Accounts onOpenForm={handleOpenForm} />}
+              {activeTab === 'charts' && <Charts onOpenForm={handleOpenForm} />}
+              {activeTab === 'settings' && <Settings />}
+            </main>
 
-          <BottomNav 
-            activeTab={activeTab} 
-            setActiveTab={setActiveTab} 
-            onOpenForm={() => handleOpenForm(null)}
-          />
-
-          {isFormOpen && (
-            <TransactionForm 
-              onClose={handleCloseForm} 
-              transactionToEdit={transactionToEdit}
-              prefillData={prefillData}
+            <BottomNav 
+              activeTab={activeTab} 
+              setActiveTab={setActiveTab} 
+              onOpenForm={() => handleOpenForm(null)}
             />
-          )}
-          
-        </div>
-      </ActivationGuard>
-    </BudgetProvider>
+
+            {isFormOpen && (
+              <TransactionForm 
+                onClose={handleCloseForm} 
+                transactionToEdit={transactionToEdit}
+                prefillData={prefillData}
+              />
+            )}
+            
+          </div>
+        </ActivationGuard>
+      </BudgetProvider>
+    </ErrorBoundary>
   );
 }
 
