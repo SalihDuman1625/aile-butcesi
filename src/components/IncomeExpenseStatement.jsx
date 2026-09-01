@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect, useState } from 'react';
+import { openPdfTable } from '../utils/pdfExport';
 import { useBudget } from '../context/BudgetContext';
 import { X, TrendingDown, TrendingUp, Edit2, Trash2, Download, Printer } from 'lucide-react';
 
@@ -121,7 +122,10 @@ const IncomeExpenseStatement = ({ type, monthIndex, year, onClose, onOpenForm })
             <button onClick={exportToExcel} title="Excel İndir" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-success">
               <Download size={20} />
             </button>
-            <button onClick={() => window.print()} title="Yazdır / PDF Al" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-primary">
+            <button onClick={() => {
+const totalAmountCalc = filteredTransactions.reduce((acc, t) => acc + t.amount, 0);
+openPdfTable('Gelir/Gider Raporu', filteredTransactions, totalAmountCalc);
+}} title="Yazdır / PDF Al" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-primary">
               <Printer size={20} />
             </button>
             <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors  ">
