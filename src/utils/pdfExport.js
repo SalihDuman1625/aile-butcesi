@@ -567,8 +567,8 @@ export const openDetailedReportPdf = (dateRange, person, category, totalIncome, 
       </div>
       
       <div class="totals-box">
-        <div>Toplam Girdi: <strong class="tot-in">${formatMoney(totalIncome)}</strong></div>
-        <div>Toplam Çıktı: <strong class="tot-out">${formatMoney(totalExpense)}</strong></div>
+        <div>Toplam Gelir: <strong class="tot-in">${formatMoney(totalIncome)}</strong></div>
+        <div>Toplam Gider: <strong class="tot-out">${formatMoney(totalExpense)}</strong></div>
       </div>
       
       <table>

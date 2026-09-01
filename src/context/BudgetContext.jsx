@@ -272,11 +272,18 @@ export const BudgetProvider = ({ children }) => {
       const bal = parseFloat(a.balance || 0);
       if (a.type === 'cash' || a.type === 'bank') totalCashAndBank += bal;
       if (a.type === 'credit_card') totalCCDebt += bal;
-      if (a.type === 'investment') totalInvestments += bal; // Assuming balance is already in TRY
+      if (a.type === 'investment') totalInvestments += bal;
     });
 
-    // Net varlığa verilen/alınan aktif borçları da ekleyebiliriz (opsiyonel)
-    const netWorth = totalCashAndBank + totalInvestments + totalCCDebt;
+    let sumReceivables = 0;
+    let sumPayables = 0;
+    const activeDebts = getDebts();
+    activeDebts.forEach(d => {
+      if (d.netAmount > 0) sumReceivables += d.netAmount;
+      if (d.netAmount < 0) sumPayables += Math.abs(d.netAmount);
+    });
+
+    const netWorth = totalCashAndBank + totalInvestments + totalCCDebt + sumReceivables - sumPayables;
     return { totalCashAndBank, totalCCDebt, totalInvestments, netWorth };
   };
 

@@ -53,9 +53,9 @@ const Charts = ({ onOpenForm }) => {
   const categoryMap = {};
 
   filteredTxs.forEach(t => {
-    if (t.type === 'income' || t.type === 'debt_taken') totalIncome += parseFloat(t.amount);
-    if (t.type === 'expense' || t.type === 'debt_given') {
-      totalExpense += parseFloat(t.amount);
+    if (t.type === \'income\') totalIncome += parseFloat(t.amount);
+    if (t.type === \'expense\') {
+        totalExpense += parseFloat(t.amount);
       categoryMap[t.category] = (categoryMap[t.category] || 0) + parseFloat(t.amount);
     }
   });
@@ -333,8 +333,8 @@ const Charts = ({ onOpenForm }) => {
               <strong>Tarih Aralığı:</strong> {dateRange} | <strong>Kişi:</strong> {person} | <strong>Kategori:</strong> {category}
             </p>
             <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', padding: '10px', backgroundColor: '#f9fafb', borderRadius: '8px' }}>
-              <div><strong>Toplam Girdi:</strong> {formatMoney(totalIncome)}</div>
-              <div><strong>Toplam Çıktı:</strong> {formatMoney(totalExpense)}</div>
+              <div><strong>Toplam Gelir:</strong> {formatMoney(totalIncome)}</div>
+              <div><strong>Toplam Gider:</strong> {formatMoney(totalExpense)}</div>
             </div>
 
             <table className="print-table">
