@@ -287,55 +287,8 @@ const Dashboard = ({ onEditTransaction }) => {
           <h2 className="text-4xl font-extrabold" style={{ letterSpacing: '-1px' }}>{formatMoney(netWorth)}</h2>
         </div>
 
-        {/* Small Widgets with Elegant Layout */}
-        <div className="widget-box widget-bank" onClick={() => setActiveWidget('bank')}>
-          <div className="widget-header">
-            <div className="widget-icon"><Building size={16} /></div>
-            <span className="widget-title">Banka</span>
-          </div>
-          <p className="widget-value">{formatMoney(sumBank)}</p>
-        </div>
-
-        <div className="widget-box widget-cash" onClick={() => setActiveWidget('cash')}>
-          <div className="widget-header">
-            <div className="widget-icon"><Coins size={16} /></div>
-            <span className="widget-title">Nakit Kasa</span>
-          </div>
-          <p className="widget-value">{formatMoney(sumCash)}</p>
-        </div>
-
-        <div className="widget-box widget-cc" onClick={() => setActiveWidget('cc')}>
-          <div className="widget-header">
-            <div className="widget-icon"><CreditCard size={16} /></div>
-            <span className="widget-title">Kredi Kartı</span>
-          </div>
-          <p className="widget-value">{formatMoney(sumCC)}</p>
-        </div>
-
-        <div className="widget-box widget-inv" onClick={() => setActiveWidget('inv')}>
-          <div className="widget-header">
-            <div className="widget-icon"><Landmark size={16} /></div>
-            <span className="widget-title">Birikimler</span>
-          </div>
-          <p className="widget-value">{formatMoney(sumInv)}</p>
-        </div>
-
-        <div className="widget-box widget-rec" onClick={() => setActiveWidget('receivables')}>
-          <div className="widget-header">
-            <div className="widget-icon"><Handshake size={16} /></div>
-            <span className="widget-title">Alacaklarım</span>
-          </div>
-          <p className="widget-value">{formatMoney(sumDebtsOwedToMe)}</p>
-        </div>
-
-        <div className="widget-box widget-debt" onClick={() => setActiveWidget('debts')}>
-          <div className="widget-header">
-            <div className="widget-icon"><Handshake size={16} /></div>
-            <span className="widget-title">Borğlarım</span>
-          </div>
-          <p className="widget-value">{formatMoney(sumDebtsIOwe)}</p>
-        </div>
-
+        {/* Small Widgets */}
+        {widgetOrder.map((id, index) => renderWidget(id, index))}
       </div>
 
       {/* Upcoming Bills Alert */}
@@ -366,7 +319,7 @@ const Dashboard = ({ onEditTransaction }) => {
       {/* AI Forecast Card */}
       <div className="card mt-2 flex justify-between items-center" style={{ background: 'linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)', border: '1px solid #BBF7D0' }}>
         <div>
-          <p className="text-success" style={{ fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.25rem' }}>­şñû YAPAY ZEKA TAHM─░N─░</p>
+          <p className="text-success" style={{ fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.25rem' }}>🤖 YAPAY ZEKA TAHM─░N─░</p>
           <p className="font-bold text-main text-sm">Gelecek Ay Gideri</p>
         </div>
         <div className="text-right">
@@ -404,7 +357,7 @@ const Dashboard = ({ onEditTransaction }) => {
                       {t.category} ÔÇó {t.accountType ? t.accountType + ' ÔÇó ' : ''}{t.person ? (t.person === 'Ortak' ? '' : t.person + ' ÔÇó ') : ''}{new Date(t.date).toLocaleDateString('tr-TR')}
                     </p>
                     <p className="text-[10px] text-muted opacity-70 mt-1">
-                      Ekleyen: {users.find(u => u.id === t.addedBy)?.name || 'Y├Ânetici'}
+                      Ekleyen: {users.find(u => u.id === t.addedBy)?.name || 'Yönetici'}
                     </p>
                   </div>
                 </div>
