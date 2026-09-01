@@ -380,17 +380,6 @@ const Dashboard = ({ onEditTransaction }) => {
                       </button>
                     </>
                   )}
-                  
-                  {(currentUser.role === 'admin' || t.addedBy === currentUser.id) && (
-                    <>
-                      <button onClick={() => onEditTransaction(t)} className="text-muted ml-2 hover:text-primary" style={{ background: 'none', border: 'none' }}>
-                        <Edit2 size={16} />
-                      </button>
-                      <button onClick={() => deleteTransaction(t.id)} className="text-danger ml-1 hover:text-red-700" style={{ background: 'none', border: 'none' }}>
-                        <Trash2 size={16} />
-                      </button>
-                    </>
-                  )}
                 </div>
               </div>
             ))}
