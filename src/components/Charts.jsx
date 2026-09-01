@@ -32,7 +32,9 @@ const CATEGORIES = ['Tümü', 'Mutfak', 'Fatura', 'Kira', 'Ulaşım', 'Sağlık'
 const Charts = ({ onOpenForm }) => {
   const { transactions, getFilteredTransactions, getDebts, deleteTransaction, users, currentUser } = useBudget();
   
-  const [dateRange, setDateRange] = useState('Bu Ay');
+    const [dateRange, setDateRange] = useState('Bu Ay');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [category, setCategory] = useState('Tümü');
   const [person, setPerson] = useState('Tümü');
   const [type, setType] = useState('all');
@@ -42,7 +44,7 @@ const Charts = ({ onOpenForm }) => {
 
   const uniquePersons = ['Tümü', ...new Set(transactions.map(t => t.person).filter(Boolean))];
 
-  const filteredTxs = getFilteredTransactions({ dateRange, category, person, type });
+  const filteredTxs = getFilteredTransactions({ dateRange, category, person, type, startDate, endDate });
 
   // Calculate summary for filtered data
   let totalIncome = 0;
@@ -154,11 +156,21 @@ const Charts = ({ onOpenForm }) => {
         </div>
         
         <div className="flex gap-2">
-          <select value={dateRange} onChange={e => setDateRange(e.target.value)} className="form-input flex-1" style={{ padding: '0.4rem', fontSize: '0.875rem' }}>
-            <option value="Bu Ay">Bu Ay</option>
-            <option value="Geçen Ay">Geçen Ay</option>
-            <option value="Tümü">Tüm Zamanlar</option>
-          </select>
+          <div className="flex flex-col flex-1 gap-1">
+            <select value={dateRange} onChange={e => setDateRange(e.target.value)} className="form-input flex-1" style={{ padding: '0.4rem', fontSize: '0.875rem' }}>
+              <option value="Bu Ay">Bu Ay</option>
+              <option value="Geçen Ay">Geçen Ay</option>
+              <option value="Bu Yıl">Bu Yıl</option>
+              <option value="Tümü">Tüm Zamanlar</option>
+              <option value="Özel">Özel Tarih</option>
+            </select>
+            {dateRange === 'Özel' && (
+              <div className="flex gap-1 flex-1">
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="form-input w-1/2" style={{ padding: '0.4rem', fontSize: '0.75rem' }} />
+                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="form-input w-1/2" style={{ padding: '0.4rem', fontSize: '0.75rem' }} />
+              </div>
+            )}
+            </div>
           
           <select value={type} onChange={e => setType(e.target.value)} className="form-input flex-1" style={{ padding: '0.4rem', fontSize: '0.875rem' }}>
             <option value="all">Tüm Türler</option>
