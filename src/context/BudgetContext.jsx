@@ -284,7 +284,7 @@ export const BudgetProvider = ({ children }) => {
     });
 
     const netWorth = totalCashAndBank + totalInvestments + totalCCDebt + sumReceivables - sumPayables;
-    return { totalCashAndBank, totalCCDebt, totalInvestments, netWorth };
+    return { totalCashAndBank, totalCCDebt, totalInvestments, netWorth, sumReceivables, sumPayables };
   };
 
   // Yeni Cari (Borç/Alacak) Sistemi

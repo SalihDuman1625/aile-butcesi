@@ -28,7 +28,7 @@ const getCategoryIcon = (category, type) => {
 
 const Dashboard = ({ onEditTransaction }) => {
   const { transactions, accounts, getAccountBalances, getUpcomingBills, getForecastForNextMonth, getDebts, deleteTransaction, users, currentUser } = useBudget();
-  const { totalCashAndBank, totalCCDebt, totalInvestments, netWorth } = getAccountBalances();
+  const { totalCashAndBank, totalCCDebt, totalInvestments, netWorth, sumReceivables = 0, sumPayables = 0 } = getAccountBalances();
   const upcomingBills = getUpcomingBills();
   const forecast = getForecastForNextMonth();
   const activeDebts = getDebts();
@@ -282,9 +282,27 @@ const Dashboard = ({ onEditTransaction }) => {
       <div className="grid grid-cols-2 gap-3 mt-1">
         
         {/* Net Worth (Full Width) */}
-        <div className="col-span-2 credit-card flex flex-col justify-center items-start">
-          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem', letterSpacing: '1px' }}>NET VARLIK</p>
-          <h2 className="text-4xl font-extrabold" style={{ letterSpacing: '-1px' }}>{formatMoney(netWorth)}</h2>
+        <div className="col-span-2 credit-card flex flex-col justify-center w-full" style={{ padding: '1.5rem', gap: '1rem' }}>
+          <div>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem', letterSpacing: '1px' }}>NET VARLIK</p>
+            <h2 className="text-4xl font-extrabold" style={{ letterSpacing: '-1px' }}>{formatMoney(netWorth)}</h2>
+          </div>
+          
+          <div className="flex items-center justify-between w-full mt-1 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="flex flex-col">
+              <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)' }}>Toplam Varlık</span>
+              <span className="font-semibold text-success" style={{ fontSize: '1rem' }}>+{formatMoney(totalCashAndBank + totalInvestments + (typeof sumReceivables !== 'undefined' ? sumReceivables : 0))}</span>
+            </div>
+            
+            <div className="text-center font-bold" style={{ color: 'rgba(255,255,255,0.2)', fontSize: '1.2rem', marginTop: '0.5rem' }}>
+              -
+            </div>
+            
+            <div className="flex flex-col items-end">
+              <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)' }}>Toplam Yükümlülük</span>
+              <span className="font-semibold text-danger" style={{ fontSize: '1rem' }}>-{formatMoney(Math.abs(totalCCDebt) + (typeof sumPayables !== 'undefined' ? sumPayables : 0))}</span>
+            </div>
+          </div>
         </div>
 
         {/* Small Widgets */}
