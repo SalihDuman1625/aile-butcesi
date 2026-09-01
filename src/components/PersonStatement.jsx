@@ -7,7 +7,26 @@ const PersonStatement = ({ personData, onClose, onOpenForm }) => {
   
   useEffect(() => {
     document.body.classList.add('printing-modal');
-    return () => document.body.classList.remove('printing-modal');
+  
+  const exportToExcel = () => {
+    let csvContent = "\uFEFF";
+    csvContent += "Tarih;Islem;Kategori;Tutar\n";
+    personTransactions.forEach(t => {
+      const d = new Date(t.date).toLocaleDateString('tr-TR');
+      const title = (t.title || '').replace(/;/g, ',');
+      const cat = (t.category || '').replace(/;/g, ',');
+      const amt = t.amount;
+      csvContent += `${d};${title};${cat};${amt}\n`;
+    });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `KisiEkstresi_${new Date().toLocaleDateString('tr-TR')}.csv`;
+    link.click();
+  };
+
+  return () => document.body.classList.remove('printing-modal');
   }, []);
 
   // O kişiye ait işlemleri kronolojik sıraya göre listele (Yeniden eskiye)
@@ -158,9 +177,28 @@ const PersonStatement = ({ personData, onClose, onOpenForm }) => {
     }, 250);
   };
 
+
+  const exportToExcel = () => {
+    let csvContent = "\uFEFF";
+    csvContent += "Tarih;Islem;Kategori;Tutar\n";
+    personTransactions.forEach(t => {
+      const d = new Date(t.date).toLocaleDateString('tr-TR');
+      const title = (t.title || '').replace(/;/g, ',');
+      const cat = (t.category || '').replace(/;/g, ',');
+      const amt = t.amount;
+      csvContent += `${d};${title};${cat};${amt}\n`;
+    });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `KisiEkstresi_${new Date().toLocaleDateString('tr-TR')}.csv`;
+    link.click();
+  };
+
   return (
     <div 
-      className="modal-overlay" 
+      className="modal-overlay print-overlay" 
       onClick={onClose} 
       style={{ 
         zIndex: 100, 
@@ -203,9 +241,19 @@ const PersonStatement = ({ personData, onClose, onOpenForm }) => {
               </div>
             )}
           </div>
-          <button onClick={onClose} className="p-2 text-muted hover:text-main rounded-full bg-gray-100 transition-colors">
+          
+          <div className="flex gap-2 items-center hide-charts-on-print">
+            <button onClick={exportToExcel} title="Excel İndir" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-success">
+              <Download size={20} />
+            </button>
+            <button onClick={() => window.print()} title="Yazdır / PDF Al" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-primary">
+              <Printer size={20} />
+            </button>
+            <button onClick={onClose} className="p-2 text-muted hover:text-main rounded-full bg-gray-100 transition-colors">
             <X size={20} />
           </button>
+          </div>
+
         </div>
 
         <div className="flex gap-2 mb-4">
@@ -262,7 +310,26 @@ const PersonStatement = ({ personData, onClose, onOpenForm }) => {
                 else if (t.type === 'expense') { typeLabel = 'Gider'; isPositive = false; } // Normal harcama
                 else if (t.type === 'income') { typeLabel = 'Gelir'; isPositive = true; } // Normal gelir
 
-                return (
+              
+  const exportToExcel = () => {
+    let csvContent = "\uFEFF";
+    csvContent += "Tarih;Islem;Kategori;Tutar\n";
+    personTransactions.forEach(t => {
+      const d = new Date(t.date).toLocaleDateString('tr-TR');
+      const title = (t.title || '').replace(/;/g, ',');
+      const cat = (t.category || '').replace(/;/g, ',');
+      const amt = t.amount;
+      csvContent += `${d};${title};${cat};${amt}\n`;
+    });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `KisiEkstresi_${new Date().toLocaleDateString('tr-TR')}.csv`;
+    link.click();
+  };
+
+  return (
                   <div key={t.id} className="flex justify-between items-center p-3 rounded-lg border border-[var(--border-color)]" style={{ backgroundColor: 'var(--card-bg)' }}>
                     <div>
                       <p className="font-bold text-main">{t.title}</p>

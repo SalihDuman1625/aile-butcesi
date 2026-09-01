@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { useBudget } from '../context/BudgetContext';
-import { X, TrendingDown, TrendingUp, Edit2, Trash2 } from 'lucide-react';
+import { X, TrendingDown, TrendingUp, Edit2, Trash2, Download, Printer } from 'lucide-react';
 
 const IncomeExpenseStatement = ({ type, monthIndex, year, onClose, onOpenForm }) => {
     const [dateRange, setDateRange] = useState('Bu Ay');
@@ -10,7 +10,26 @@ const IncomeExpenseStatement = ({ type, monthIndex, year, onClose, onOpenForm })
   
   useEffect(() => {
     document.body.classList.add('printing-modal');
-    return () => document.body.classList.remove('printing-modal');
+  
+  const exportToExcel = () => {
+    let csvContent = "\uFEFF";
+    csvContent += "Tarih;Islem;Kategori;Tutar\n";
+    filteredTransactions.forEach(t => {
+      const d = new Date(t.date).toLocaleDateString('tr-TR');
+      const title = (t.title || '').replace(/;/g, ',');
+      const cat = (t.category || '').replace(/;/g, ',');
+      const amt = t.amount;
+      csvContent += `${d};${title};${cat};${amt}\n`;
+    });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `GelirGider_${new Date().toLocaleDateString('tr-TR')}.csv`;
+    link.click();
+  };
+
+  return () => document.body.classList.remove('printing-modal');
   }, []);
 
   const filteredTransactions = useMemo(() => {
@@ -48,6 +67,25 @@ const IncomeExpenseStatement = ({ type, monthIndex, year, onClose, onOpenForm })
 
   
 
+
+  const exportToExcel = () => {
+    let csvContent = "\uFEFF";
+    csvContent += "Tarih;Islem;Kategori;Tutar\n";
+    filteredTransactions.forEach(t => {
+      const d = new Date(t.date).toLocaleDateString('tr-TR');
+      const title = (t.title || '').replace(/;/g, ',');
+      const cat = (t.category || '').replace(/;/g, ',');
+      const amt = t.amount;
+      csvContent += `${d};${title};${cat};${amt}\n`;
+    });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `GelirGider_${new Date().toLocaleDateString('tr-TR')}.csv`;
+    link.click();
+  };
+
   return (
     <div className="modal-overlay z-[999] print-overlay flex items-center justify-center p-4">
       <div className="modal-content w-full max-w-2xl bg-white rounded-2xl shadow-xl flex flex-col max-h-[90vh]">
@@ -78,9 +116,19 @@ const IncomeExpenseStatement = ({ type, monthIndex, year, onClose, onOpenForm })
               )}
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors hide-charts-on-print self-start">
+          
+          <div className="flex gap-2 items-center hide-charts-on-print">
+            <button onClick={exportToExcel} title="Excel İndir" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-success">
+              <Download size={20} />
+            </button>
+            <button onClick={() => window.print()} title="Yazdır / PDF Al" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-primary">
+              <Printer size={20} />
+            </button>
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors  ">
             <X size={20} className="text-muted" />
           </button>
+          </div>
+
         </div>
 
         {/* BODY */}

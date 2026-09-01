@@ -1,10 +1,15 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useBudget } from '../context/BudgetContext';
-import { X, ShieldAlert, CheckCircle2, TrendingDown, TrendingUp, ArrowRightLeft, Edit2, Trash2 } from 'lucide-react';
+import { X, ShieldAlert, CheckCircle2, TrendingDown, TrendingUp, ArrowRightLeft, Edit2, Trash2, Download, Printer } from 'lucide-react';
 
 const AccountStatement = ({ account, onClose, onOpenForm }) => {
   const { transactions, addTransaction, editAccount, deleteTransaction, currentUser } = useBudget();
   const [actualBalance, setActualBalance] = useState('');
+
+  useEffect(() => {
+    document.body.classList.add('printing-modal');
+    return () => document.body.classList.remove('printing-modal');
+  }, []);
   
   // Sadece bu hesaba ait işlemleri (Giren ve Çıkan) kronolojik sıraya göre listele (Yeniden eskiye)
   const accountTransactions = useMemo(() => {
@@ -43,8 +48,27 @@ const AccountStatement = ({ account, onClose, onOpenForm }) => {
     setActualBalance('');
   };
 
+
+  const exportToExcel = () => {
+    let csvContent = "\uFEFF";
+    csvContent += "Tarih;Islem;Kategori;Tutar\n";
+    accountTransactions.forEach(t => {
+      const d = new Date(t.date).toLocaleDateString('tr-TR');
+      const title = (t.title || '').replace(/;/g, ',');
+      const cat = (t.category || '').replace(/;/g, ',');
+      const amt = t.amount;
+      csvContent += `${d};${title};${cat};${amt}\n`;
+    });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `HesapEkstresi_${new Date().toLocaleDateString('tr-TR')}.csv`;
+    link.click();
+  };
+
   return (
-    <div className="modal-overlay" onClick={onClose} style={{ zIndex: 100 }}>
+    <div className="modal-overlay print-overlay" onClick={onClose} style={{ zIndex: 100 }}>
       <div className="modal-content w-full h-full max-h-screen md:max-h-[90vh] flex flex-col m-0 md:m-4 rounded-none md:rounded-2xl" onClick={e => e.stopPropagation()}>
         
         {/* Header */}
@@ -53,9 +77,19 @@ const AccountStatement = ({ account, onClose, onOpenForm }) => {
             <h2 className="text-xl font-bold">{account.name} Ekstresi</h2>
             <p className="text-sm text-muted">{account.type === 'bank' ? 'Banka Hesabı' : account.type === 'credit_card' ? 'Kredi Kartı' : 'Diğer Hesap'}</p>
           </div>
-          <button onClick={onClose} className="p-2 bg-gray-100 rounded-full text-gray-500">
+          
+          <div className="flex gap-2 items-center hide-charts-on-print">
+            <button onClick={exportToExcel} title="Excel İndir" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-success">
+              <Download size={20} />
+            </button>
+            <button onClick={() => window.print()} title="Yazdır / PDF Al" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-primary">
+              <Printer size={20} />
+            </button>
+            <button onClick={onClose} className="p-2 bg-gray-100 rounded-full text-gray-500">
             <X size={24} />
           </button>
+          </div>
+
         </div>
 
         {/* Mutabakat (Reconciliation) Section */}
@@ -121,7 +155,26 @@ const AccountStatement = ({ account, onClose, onOpenForm }) => {
               if (t.type === 'income' || t.type === 'debt_taken') isIncoming = true;
               if (t.type === 'transfer' && t.targetAccountId === account.id) isIncoming = true; // Bize transfer geldi
               
-              return (
+            
+  const exportToExcel = () => {
+    let csvContent = "\uFEFF";
+    csvContent += "Tarih;Islem;Kategori;Tutar\n";
+    accountTransactions.forEach(t => {
+      const d = new Date(t.date).toLocaleDateString('tr-TR');
+      const title = (t.title || '').replace(/;/g, ',');
+      const cat = (t.category || '').replace(/;/g, ',');
+      const amt = t.amount;
+      csvContent += `${d};${title};${cat};${amt}\n`;
+    });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `HesapEkstresi_${new Date().toLocaleDateString('tr-TR')}.csv`;
+    link.click();
+  };
+
+  return (
                 <div key={t.id} className="card p-3 flex justify-between items-center" style={{ border: 'none', backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                   <div className="flex gap-3 items-center">
                     <div className={`p-2 rounded-full ${isIncoming ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
