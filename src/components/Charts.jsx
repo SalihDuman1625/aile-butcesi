@@ -91,11 +91,12 @@ const Charts = ({ onOpenForm }) => {
   };
 
   const exportToCSV = () => {
-    let csv = 'Tarih;Kategori;Kişi;Tur;Tutar;Aciklama\n';
+    let csv = 'Tarih;Kategori;Islem Turu;Kisi;Aciklama;Tutar
+';
     filteredTxs.forEach(t => {
       const typeStr = t.type === 'expense' ? 'Gider' : t.type === 'income' ? 'Gelir' : t.type === 'transfer' ? 'Transfer' : t.type === 'debt_given' ? 'Borc Verildi' : 'Borc Alindi';
       const amountStr = t.amount.toString().replace('.', ','); // Tutar noktasını virgüle çevir (Excel Türkçe için)
-      csv += `${t.date.split('T')[0]};"${t.category}";"${t.person}";"${typeStr}";"${amountStr}";"${t.title}"\n`;
+      csv += `${t.date.split('T')[0]};\"${t.category || '-'}\";\"${typeStr}\";\"${t.person || '-'}\";\"${t.title || '-'}\";\"${amountStr}\"\n`;;
     });
     
     // Add BOM for Excel UTF-8 support
