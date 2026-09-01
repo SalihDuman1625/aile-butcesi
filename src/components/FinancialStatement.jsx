@@ -65,7 +65,7 @@ const FinancialStatement = ({ onClose, dateRange, filteredTransactions }) => {
             <p className="text-muted">Rapor Tarihi: {new Date().toLocaleDateString('tr-TR')}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 print-grid-2 gap-8">
             {/* BİLANÇO */}
             <div>
               <h3 className="text-lg font-bold mb-4 border-b pb-2 text-primary uppercase">Bilanço (Mevcut Durum)</h3>
