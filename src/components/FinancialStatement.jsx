@@ -71,16 +71,23 @@ const FinancialStatement = ({ onClose, dateRange, filteredTransactions }) => {
     setIsDetailed(detailed);
     
     const data = {
-      totalCashAndBank, cashAndBankAccounts,
-      totalInvestments, investmentAccounts,
-      sumReceivables, receivablesDetail,
+      totalCashAndBank, 
+      cashAndBankAccounts: cashAndBankAccounts.map(a => ({ name: a.name, amount: a.balance })),
+      totalInvestments, 
+      investmentAccounts: investmentAccounts.map(a => ({ name: a.name, amount: a.balance })),
+      sumReceivables, 
+      receivablesDetail,
       totalAssets,
-      totalCCDebt, creditCardAccounts,
-      sumPayables, payablesDetail,
+      totalCCDebt, 
+      creditCardAccounts: creditCardAccounts.map(a => ({ name: a.name, amount: Math.abs(a.balance) })),
+      sumPayables, 
+      payablesDetail,
       totalLiabilities,
       equity,
-      periodIncome, incomeByCategory,
-      periodExpense, expenseByCategory,
+      periodIncome, 
+      incomeByCategory,
+      periodExpense, 
+      expenseByCategory,
       periodNetIncome
     };
     
