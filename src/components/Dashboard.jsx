@@ -276,21 +276,7 @@ const Dashboard = ({ onEditTransaction, onViewAll }) => {
 
       {/* DASHBOARD WIDGETS GRID */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-1">
-          <div className="widget-box widget-income" onClick={() => setSelectedIncomeExpenseForStatement('income')}>
-            <div className="widget-header">
-              <div className="widget-icon"><TrendingUp size={16} /></div>
-              <span className="widget-title">Bu Ayki Gelirler</span>
-            </div>
-            <p className="widget-value">{formatMoney(currentMonthIncome)}</p>
-          </div>
 
-          <div className="widget-box widget-expense" onClick={() => setSelectedIncomeExpenseForStatement('expense')}>
-            <div className="widget-header">
-              <div className="widget-icon"><TrendingDown size={16} /></div>
-              <span className="widget-title">Bu Ayki Giderler</span>
-            </div>
-            <p className="widget-value">{formatMoney(currentMonthExpense)}</p>
-          </div>
         
         {/* Net Worth (Full Width) */}
         <div className="col-span-2 md:col-span-4 credit-card flex flex-col justify-center items-start">
@@ -299,53 +285,7 @@ const Dashboard = ({ onEditTransaction, onViewAll }) => {
         </div>
 
         {/* Small Widgets with Elegant Layout */}
-        <div className="widget-box widget-bank" onClick={() => setActiveWidget('bank')}>
-          <div className="widget-header">
-            <div className="widget-icon"><Building size={16} /></div>
-            <span className="widget-title">Banka</span>
-          </div>
-          <p className="widget-value">{formatMoney(sumBank)}</p>
-        </div>
-
-        <div className="widget-box widget-cash" onClick={() => setActiveWidget('cash')}>
-          <div className="widget-header">
-            <div className="widget-icon"><Coins size={16} /></div>
-            <span className="widget-title">Nakit Kasa</span>
-          </div>
-          <p className="widget-value">{formatMoney(sumCash)}</p>
-        </div>
-
-        <div className="widget-box widget-cc" onClick={() => setActiveWidget('cc')}>
-          <div className="widget-header">
-            <div className="widget-icon"><CreditCard size={16} /></div>
-            <span className="widget-title">Kredi Kartı</span>
-          </div>
-          <p className="widget-value">{formatMoney(sumCC)}</p>
-        </div>
-
-        <div className="widget-box widget-inv" onClick={() => setActiveWidget('inv')}>
-          <div className="widget-header">
-            <div className="widget-icon"><Landmark size={16} /></div>
-            <span className="widget-title">Birikimler</span>
-          </div>
-          <p className="widget-value">{formatMoney(sumInv)}</p>
-        </div>
-
-        <div className="widget-box widget-rec" onClick={() => setActiveWidget('receivables')}>
-          <div className="widget-header">
-            <div className="widget-icon"><Handshake size={16} /></div>
-            <span className="widget-title">Alacaklarım</span>
-          </div>
-          <p className="widget-value">{formatMoney(sumDebtsOwedToMe)}</p>
-        </div>
-
-        <div className="widget-box widget-debt" onClick={() => setActiveWidget('debts')}>
-          <div className="widget-header">
-            <div className="widget-icon"><Handshake size={16} /></div>
-            <span className="widget-title">Borçlarım</span>
-          </div>
-          <p className="widget-value">{formatMoney(sumDebtsIOwe)}</p>
-        </div>
+        {widgetOrder.map((id, index) => renderWidget(id, index))}
 
       </div>
 
