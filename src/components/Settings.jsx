@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useBudget } from '../context/BudgetContext';
-import { Moon, Sun, Users, UserPlus, ShieldAlert, Download, Trash2, CheckCircle2, Lock, Unlock, Key, Send, BookOpen } from 'lucide-react';
+import { Moon, Sun, Users, UserPlus, ShieldAlert, Download, Upload, Trash2, CheckCircle2, Lock, Unlock, Key, Send, BookOpen } from 'lucide-react';
 import { generateLicenseCode } from './ActivationGuard';
 import GuideModal from './GuideModal';
 
@@ -79,6 +79,32 @@ const Settings = () => {
     setShowChangePin(false);
     setNewPinForCurrent('');
     alert("Şifreniz başarıyla güncellendi.");
+  };
+
+
+  const handleImportData = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.transactions && data.accounts) {
+          localStorage.setItem('budget_transactions', JSON.stringify(data.transactions));
+          localStorage.setItem('budget_accounts', JSON.stringify(data.accounts));
+          if (data.bills) localStorage.setItem('budget_bills', JSON.stringify(data.bills));
+          if (data.users) localStorage.setItem('budget_users', JSON.stringify(data.users));
+          alert('Yedek başarıyla yüklendi! Uygulama yeniden başlatılacak.');
+          window.location.reload();
+        } else {
+          alert('Geçersiz yedekleme dosyası formatı!');
+        }
+      } catch (err) {
+        alert('Dosya okunurken bir hata oluştu: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
   };
 
   const handleExportData = () => {
@@ -310,6 +336,11 @@ const Settings = () => {
         <button onClick={handleExportData} className="btn" style={{ backgroundColor: '#10B981', color: 'white' }}>
           Tüm Veriyi İndir (Yedekle)
         </button>
+        <label className="btn mt-2 cursor-pointer flex justify-center items-center gap-2" style={{ backgroundColor: '#3B82F6', color: 'white' }}>
+          <Upload size={18} /> Yedeği Geri Yükle
+          <input type="file" accept=".json" style={{ display: 'none' }} onChange={handleImportData} />
+        </label>
+
 
         {currentUser.role === 'admin' && (
           <div className="mt-4 border-t border-border pt-4">
