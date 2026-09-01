@@ -319,7 +319,7 @@ const Dashboard = ({ onEditTransaction }) => {
       {/* AI Forecast Card */}
       <div className="card mt-2 flex justify-between items-center" style={{ background: 'linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)', border: '1px solid #BBF7D0' }}>
         <div>
-          <p className="text-success" style={{ fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.25rem' }}>🤖 YAPAY ZEKA TAHM─░N─░</p>
+          <p className="text-success" style={{ fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.25rem' }}>🤖 YAPAY ZEKA TAHMİNİ</p>
           <p className="font-bold text-main text-sm">Gelecek Ay Gideri</p>
         </div>
         <div className="text-right">
@@ -330,7 +330,7 @@ const Dashboard = ({ onEditTransaction }) => {
       {/* Recent Transactions */}
       <div className="mt-4 mb-8">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-main">Son ─░şlemler</h3>
+          <h3 className="text-lg font-bold text-main">Son İşlemler</h3>
           <button style={{ background: 'none', border: 'none', color: 'var(--primary-color)', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer' }}>Tümü</button>
         </div>
         
