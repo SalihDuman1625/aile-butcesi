@@ -254,7 +254,14 @@ const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
               inputMode="decimal"
               placeholder="0,00" 
               value={amount} 
-              onChange={e => setAmount(formatAmountDisplay(e.target.value))}
+              onChange={e => {
+                      const newAmount = formatAmountDisplay(e.target.value);
+                      setAmount(newAmount);
+                      const parsedAmt = parseFloat(newAmount.toString().replace(/\./g, '').replace(',', '.'));
+                      if (parsedAmt && assetAmount && parseFloat(assetAmount) > 0) {
+                         setAssetRate(parseFloat((parsedAmt / parseFloat(assetAmount)).toFixed(2)).toString());
+                      }
+                    }}
               className="form-input text-lg font-bold"
               style={{ fontSize: '1.25rem' }}
               autoFocus
@@ -431,7 +438,13 @@ const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
                   value={assetAmount} 
                   onChange={e => {
                     setAssetAmount(e.target.value);
-                    if (e.target.value && assetRate) setAmount((parseFloat(e.target.value) * parseFloat(assetRate)).toString());
+                    const val = parseFloat(e.target.value);
+                    const parsedAmt = parseFloat(amount.toString().replace(/\./g, '').replace(',', '.'));
+                    if (val && parsedAmt) {
+                       setAssetRate(parseFloat((parsedAmt / val).toFixed(2)).toString());
+                    } else if (val && assetRate) {
+                       setAmount(formatAmountDisplay((val * parseFloat(assetRate)).toFixed(2).replace('.', ',')));
+                    }
                   }} 
                   className="form-input" 
                   required 
@@ -446,7 +459,11 @@ const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
                   value={assetRate} 
                   onChange={e => {
                     setAssetRate(e.target.value);
-                    if (e.target.value && assetAmount) setAmount((parseFloat(e.target.value) * parseFloat(assetAmount)).toString());
+                    const rate = parseFloat(e.target.value);
+                    const val = parseFloat(assetAmount);
+                    if (rate && val) {
+                       setAmount(formatAmountDisplay((rate * val).toFixed(2).replace('.', ',')));
+                    }
                   }} 
                   className="form-input" 
                   required 
