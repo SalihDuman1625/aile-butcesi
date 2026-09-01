@@ -1,16 +1,36 @@
 import React, { useState } from 'react';
 import { useBudget } from '../context/BudgetContext';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { Share2, Filter, SearchX, FileText, FileBarChart } from 'lucide-react';
+import { Share2, Filter, SearchX, FileText, FileBarChart, ShoppingBag, Coffee, Home, Zap, Heart, Book, Film, MoreHorizontal, Briefcase, TrendingUp, DollarSign, Trash2, Edit2, ArrowRightLeft, HandCoins } from 'lucide-react';
 import PersonStatement from './PersonStatement';
 import FinancialStatement from './FinancialStatement';
+
+const getCategoryIcon = (category, type) => {
+  if (type === 'transfer') return <ArrowRightLeft size={20} />;
+  if (type === 'debt_given' || type === 'debt_taken') return <HandCoins size={20} />;
+  if (type === 'income') {
+    if (category === 'Maaş') return <Briefcase size={20} />;
+    if (category === 'Yatırım Getirisi') return <TrendingUp size={20} />;
+    return <DollarSign size={20} />;
+  }
+  switch(category) {
+    case 'Mutfak': return <ShoppingBag size={20} />;
+    case 'Kira': return <Home size={20} />;
+    case 'Fatura': return <Zap size={20} />;
+    case 'Sağlık': return <Heart size={20} />;
+    case 'Eğitim': return <Book size={20} />;
+    case 'Eğlence': return <Film size={20} />;
+    case 'Ulaşım': return <MoreHorizontal size={20} />;
+    default: return <Coffee size={20} />;
+  }
+};
 
 const COLORS = ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316', '#64748B'];
 
 const CATEGORIES = ['Tümü', 'Mutfak', 'Fatura', 'Kira', 'Ulaşım', 'Sağlık', 'Eğitim', 'Eğlence', 'Giyim', 'Diğer', 'Maaş', 'Transfer / Virman', 'Borç Verildi', 'Borç Alındı'];
 
 const Charts = ({ onOpenForm }) => {
-  const { transactions, getFilteredTransactions, getDebts } = useBudget();
+  const { transactions, getFilteredTransactions, getDebts, deleteTransaction, users, currentUser } = useBudget();
   
   const [dateRange, setDateRange] = useState('Bu Ay');
   const [category, setCategory] = useState('Tümü');
@@ -245,6 +265,56 @@ const Charts = ({ onOpenForm }) => {
           </div>
 
           {/* SADECE YAZDIRILIRKEN GÖRÜNEN DETAYLI TABLO (PDF İÇİN) */}
+
+          <div className="hide-charts-on-print mt-8">
+            <h3 className="text-lg font-bold mb-4 px-1">Filtrelenen İşlemler ({filteredTxs.length})</h3>
+            <div className="flex flex-col gap-3">
+              {filteredTxs.map(t => (
+                <div key={t.id} className="card flex justify-between items-center" style={{ border: 'none', padding: '1rem' }}>
+                  <div className="flex items-center gap-3">
+                    <div style={{ 
+                      width: '44px', height: '44px', borderRadius: '50%', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      backgroundColor: (t.type === 'income' || t.type === 'debt_taken') ? '#ECFDF5' : (t.type === 'transfer' ? '#EFF6FF' : 'var(--bg-color)'),
+                      color: (t.type === 'income' || t.type === 'debt_taken') ? 'var(--success)' : (t.type === 'transfer' ? 'var(--primary-color)' : 'var(--text-main)')
+                    }}>
+                       {getCategoryIcon(t.category, t.type)}
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-main">{t.title}</p>
+                      <p className="text-xs text-muted" style={{ marginTop: '0.125rem', fontSize: '0.7rem' }}>
+                        {t.category} • {t.accountType ? t.accountType + ' • ' : ''}{t.person ? (t.person === 'Ortak' ? '' : t.person + ' • ') : ''}{new Date(t.date).toLocaleDateString('tr-TR')}
+                      </p>
+                      <p className="text-[10px] text-muted opacity-70 mt-1">
+                        Ekleyen: {users.find(u => u.id === t.addedBy)?.name || 'Yönetici'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-right">
+                      <p className={`font-bold text-sm ${(t.type === 'income' || t.type === 'debt_taken') ? 'text-success' : (t.type === 'transfer' ? 'text-primary' : 'text-main')}`}>
+                        {t.type === 'expense' || t.type === 'debt_given' ? '-' : ''}
+                        {t.type === 'income' || t.type === 'debt_taken' ? '+' : ''}
+                        {formatMoney(t.amount)}
+                      </p>
+                    </div>
+                    
+                    {(currentUser.role === 'admin' || t.addedBy === currentUser.id) && (
+                      <>
+                        <button onClick={() => onOpenForm(t)} className="text-muted ml-2 hover:text-primary" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                          <Edit2 size={16} />
+                        </button>
+                        <button onClick={() => deleteTransaction(t.id)} className="text-danger ml-1 hover:text-red-700" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                          <Trash2 size={16} />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="print-only" style={{ display: 'none' }}>
             <h2 style={{ fontSize: '18pt', fontWeight: 'bold', marginBottom: '10px' }}>Aile Bütçesi Detaylı Rapor</h2>
             <p style={{ fontSize: '11pt', color: '#666', marginBottom: '15px' }}>
