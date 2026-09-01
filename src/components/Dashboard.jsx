@@ -139,10 +139,10 @@ const Dashboard = ({ onEditTransaction, onViewAll }) => {
       </div>
 
       {/* DASHBOARD WIDGETS GRID */}
-      <div className="grid grid-cols-2 gap-3 mt-1">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-1">
         
         {/* Net Worth (Full Width) */}
-        <div className="col-span-2 credit-card flex flex-col justify-center items-start">
+        <div className="col-span-2 md:col-span-4 credit-card flex flex-col justify-center items-start">
           <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem', letterSpacing: '1px' }}>NET VARLIK</p>
           <h2 className="text-4xl font-extrabold" style={{ letterSpacing: '-1px' }}>{formatMoney(netWorth)}</h2>
         </div>
