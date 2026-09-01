@@ -1,10 +1,15 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useBudget } from '../context/BudgetContext';
 import { X, ArrowUpCircle, ArrowDownCircle, Printer, Download, Calendar } from 'lucide-react';
 
 const PersonStatement = ({ personData, onClose, onOpenForm }) => {
   const { transactions } = useBudget();
   
+  useEffect(() => {
+    document.body.classList.add('printing-modal');
+    return () => document.body.classList.remove('printing-modal');
+  }, []);
+
   // O kişiye ait işlemleri kronolojik sıraya göre listele (Yeniden eskiye)
   const accountTransactions = useMemo(() => {
     return transactions

@@ -386,6 +386,36 @@ body {
     color-adjust: exact;
   }
 }
+
+@media print {
+  body.printing-modal * {
+    visibility: hidden;
+  }
+  body.printing-modal .print-overlay,
+  body.printing-modal .print-overlay * {
+    visibility: visible;
+  }
+  body.printing-modal .print-overlay {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    background: white !important;
+  }
+  body.printing-modal .print-overlay .modal-content {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    max-height: none !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    width: 100% !important;
+    padding: 0 !important;
+  }
+}
+
 /* Responsive Desktop Styles */
 @media screen and (min-width: 768px) {
   body {

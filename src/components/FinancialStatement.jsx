@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Printer } from 'lucide-react';
 import { useBudget } from '../context/BudgetContext';
 
@@ -6,6 +6,11 @@ const FinancialStatement = ({ onClose, dateRange, filteredTransactions }) => {
   const { getDebts, getAccountBalances } = useBudget();
   const activeDebts = getDebts();
   const { totalCashAndBank, totalCCDebt, totalInvestments } = getAccountBalances();
+
+  useEffect(() => {
+    document.body.classList.add('printing-modal');
+    return () => document.body.classList.remove('printing-modal');
+  }, []);
 
   let sumReceivables = 0;
   let sumPayables = 0;
