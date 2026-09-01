@@ -58,6 +58,46 @@ const Dashboard = ({ onEditTransaction }) => {
   const sumDebtsIOwe = activeDebts.filter(d => d.netAmount < 0).reduce((sum, d) => sum + Math.abs(d.netAmount), 0);
   const sumDebtsOwedToMe = activeDebts.filter(d => d.netAmount > 0).reduce((sum, d) => sum + d.netAmount, 0);
 
+  
+  const [incomeRange, setIncomeRange] = useState(() => localStorage.getItem('dashboardIncomeRange') || 'thisMonth');
+  const [expenseRange, setExpenseRange] = useState(() => localStorage.getItem('dashboardExpenseRange') || 'thisMonth');
+
+  const handleIncomeRangeChange = (e) => {
+    e.stopPropagation();
+    const val = e.target.value;
+    setIncomeRange(val);
+    localStorage.setItem('dashboardIncomeRange', val);
+  };
+
+  const handleExpenseRangeChange = (e) => {
+    e.stopPropagation();
+    const val = e.target.value;
+    setExpenseRange(val);
+    localStorage.setItem('dashboardExpenseRange', val);
+  };
+
+  const calculateRangeTotal = (type, range) => {
+    const now = new Date();
+    const currentM = now.getMonth();
+    const currentY = now.getFullYear();
+    
+    return transactions.filter(t => {
+      if (t.type !== type) return false;
+      const d = new Date(t.date);
+      if (range === 'thisMonth') return d.getMonth() === currentM && d.getFullYear() === currentY;
+      if (range === 'lastMonth') {
+        const lastM = currentM === 0 ? 11 : currentM - 1;
+        const lastY = currentM === 0 ? currentY - 1 : currentY;
+        return d.getMonth() === lastM && d.getFullYear() === lastY;
+      }
+      if (range === 'thisYear') return d.getFullYear() === currentY;
+      return true; // allTime
+    }).reduce((acc, t) => acc + t.amount, 0);
+  };
+
+  const calculatedIncome = calculateRangeTotal('income', incomeRange);
+  const calculatedExpense = calculateRangeTotal('expense', expenseRange);
+
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
@@ -129,21 +169,47 @@ const Dashboard = ({ onEditTransaction }) => {
         </div>
       );
       case 'income': return (
-        <div key="income" className="widget-box widget-income " onClick={() => setSelectedIncomeExpenseForStatement('income')}>
-          <div className="widget-header">
-            <div className="widget-icon"><TrendingUp size={16} /></div>
-            <span className="widget-title">Gelirler (Bu Ay)</span>
+        <div key="income" className="widget-box widget-income" onClick={() => setSelectedIncomeExpenseForStatement('income')}>
+          <div className="widget-header" style={{ width: '100%', justifyContent: 'space-between' }}>
+            <div className="flex items-center gap-2">
+              <div className="widget-icon"><TrendingUp size={16} /></div>
+              <span className="widget-title">Gelirler</span>
+            </div>
+            <select 
+              value={incomeRange} 
+              onChange={handleIncomeRangeChange} 
+              onClick={(e) => e.stopPropagation()}
+              style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', borderRadius: '4px', padding: '2px 4px', fontSize: '0.75rem', outline: 'none', cursor: 'pointer' }}
+            >
+              <option value="thisMonth" style={{ color: 'black' }}>Bu Ay</option>
+              <option value="lastMonth" style={{ color: 'black' }}>Geçen Ay</option>
+              <option value="thisYear" style={{ color: 'black' }}>Bu Yıl</option>
+              <option value="allTime" style={{ color: 'black' }}>Tümü</option>
+            </select>
           </div>
-          <p className="widget-value">{formatMoney(currentMonthIncome)}</p>
+          <p className="widget-value">{formatMoney(calculatedIncome)}</p>
         </div>
       );
       case 'expense': return (
-        <div key="expense" className="widget-box widget-expense " onClick={() => setSelectedIncomeExpenseForStatement('expense')}>
-          <div className="widget-header">
-            <div className="widget-icon"><TrendingDown size={16} /></div>
-            <span className="widget-title">Giderler (Bu Ay)</span>
+        <div key="expense" className="widget-box widget-expense" onClick={() => setSelectedIncomeExpenseForStatement('expense')}>
+          <div className="widget-header" style={{ width: '100%', justifyContent: 'space-between' }}>
+            <div className="flex items-center gap-2">
+              <div className="widget-icon"><TrendingDown size={16} /></div>
+              <span className="widget-title">Giderler</span>
+            </div>
+            <select 
+              value={expenseRange} 
+              onChange={handleExpenseRangeChange} 
+              onClick={(e) => e.stopPropagation()}
+              style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', borderRadius: '4px', padding: '2px 4px', fontSize: '0.75rem', outline: 'none', cursor: 'pointer' }}
+            >
+              <option value="thisMonth" style={{ color: 'black' }}>Bu Ay</option>
+              <option value="lastMonth" style={{ color: 'black' }}>Geçen Ay</option>
+              <option value="thisYear" style={{ color: 'black' }}>Bu Yıl</option>
+              <option value="allTime" style={{ color: 'black' }}>Tümü</option>
+            </select>
           </div>
-          <p className="widget-value">{formatMoney(currentMonthExpense)}</p>
+          <p className="widget-value">{formatMoney(calculatedExpense)}</p>
         </div>
       );
       default: return null;
