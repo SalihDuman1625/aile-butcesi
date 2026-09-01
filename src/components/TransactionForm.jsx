@@ -206,7 +206,7 @@ const TransactionForm = ({ onClose, transactionToEdit, prefillData }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay z-[1000]" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">{transactionToEdit ? 'İşlemi Düzenle' : 'İşlem Ekle'}</h2>
