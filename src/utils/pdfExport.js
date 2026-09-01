@@ -195,9 +195,16 @@ export const openFinancialPdf = (isDetailed, dateRange, data) => {
     if (isDetailed && items && items.length > 0) {
       html += `<div class="detail-list">`;
       items.forEach(item => {
+        let assetStr = '';
+        if (item.assets) {
+           const keys = Object.keys(item.assets).filter(a => Math.abs(item.assets[a]) > 0.001);
+           if (keys.length > 0) {
+              assetStr = ` <span style="font-size: 0.85em; color: #64748b; margin-left: 5px;">(${keys.map(k => (item.assets[k] > 0 ? '+' : '') + item.assets[k] + ' ' + k).join(', ')})</span>`;
+           }
+        }
         html += `
           <div class="detail-item">
-            <span>${item.name}</span>
+            <span>${item.name}${assetStr}</span>
             <span>${formatMoney(item.amount)}</span>
           </div>
         `;

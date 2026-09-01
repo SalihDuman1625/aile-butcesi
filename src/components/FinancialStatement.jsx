@@ -168,7 +168,14 @@ const FinancialStatement = ({ onClose, dateRange, filteredTransactions }) => {
                 </div>
                 {isDetailed && receivablesDetail.map(r => (
                   <div key={r.name} className="flex justify-between py-1 pl-4 text-xs text-muted border-b border-gray-100">
-                    <span>{r.name}</span>
+                    <span>
+                      {r.name}
+                      {r.assets && Object.keys(r.assets).some(a => Math.abs(r.assets[a]) > 0.001) && (
+                        <span className="ml-2 text-[10px] text-primary">
+                          ({Object.keys(r.assets).filter(a => Math.abs(r.assets[a]) > 0.001).map(a => `${r.assets[a] > 0 ? '+' : ''}${r.assets[a]} ${a}`).join(', ')})
+                        </span>
+                      )}
+                    </span>
                     <span>{formatMoney(r.amount)}</span>
                   </div>
                 ))}
@@ -201,7 +208,14 @@ const FinancialStatement = ({ onClose, dateRange, filteredTransactions }) => {
                 </div>
                 {isDetailed && payablesDetail.map(p => (
                   <div key={p.name} className="flex justify-between py-1 pl-4 text-xs text-muted border-b border-gray-100">
-                    <span>{p.name}</span>
+                    <span>
+                      {p.name}
+                      {p.assets && Object.keys(p.assets).some(a => Math.abs(p.assets[a]) > 0.001) && (
+                        <span className="ml-2 text-[10px] text-primary">
+                          ({Object.keys(p.assets).filter(a => Math.abs(p.assets[a]) > 0.001).map(a => `${p.assets[a] < 0 ? '' : '+'}${p.assets[a]} ${a}`).join(', ')})
+                        </span>
+                      )}
+                    </span>
                     <span>{formatMoney(p.amount)}</span>
                   </div>
                 ))}
