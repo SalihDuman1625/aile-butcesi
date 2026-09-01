@@ -59,6 +59,9 @@ const Dashboard = ({ onEditTransaction }) => {
   const sumDebtsOwedToMe = activeDebts.filter(d => d.netAmount > 0).reduce((sum, d) => sum + d.netAmount, 0);
 
   
+  
+  const [showNetWorthBreakdown, setShowNetWorthBreakdown] = useState(null);
+
   const [incomeRange, setIncomeRange] = useState(() => localStorage.getItem('dashboardIncomeRange') || 'thisMonth');
   const [expenseRange, setExpenseRange] = useState(() => localStorage.getItem('dashboardExpenseRange') || 'thisMonth');
 
