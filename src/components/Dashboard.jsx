@@ -84,8 +84,8 @@ const Dashboard = ({ onEditTransaction }) => {
     return defaultWidgetOrder;
   });
 
-  const dragItem = useRef(null);
-  const dragOverItem = useRef(null);
+  const dragItem = React.useRef(null);
+  const dragOverItem = React.useRef(null);
 
   const saveWidgetOrder = (newOrder) => {
     setWidgetOrder(newOrder);
