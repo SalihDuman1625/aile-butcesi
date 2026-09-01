@@ -1,8 +1,10 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useBudget } from '../context/BudgetContext';
-import { ShoppingBag, Coffee, Home, Zap, Heart, Book, Film, MoreHorizontal, Briefcase, TrendingUp, DollarSign, AlertCircle, CheckCircle2, Trash2, Edit2, ArrowRightLeft, HandCoins, Building, CreditCard, Coins, X, Landmark, Handshake } from 'lucide-react';
+import { TrendingDown, ShoppingBag, Coffee, Home, Zap, Heart, Book, Film, MoreHorizontal, Briefcase, TrendingUp, DollarSign, AlertCircle, CheckCircle2, Trash2, Edit2, ArrowRightLeft, HandCoins, Building, CreditCard, Coins, X, Landmark, Handshake } from 'lucide-react';
 import PayBillModal from './PayBillModal';
 import AccountStatement from './AccountStatement';
+import IncomeExpenseStatement from './IncomeExpenseStatement';
+import PersonStatement from './PersonStatement';
 
 const getCategoryIcon = (category, type) => {
   if (type === 'transfer') return <ArrowRightLeft size={20} />;
