@@ -72,14 +72,14 @@ const FinancialStatement = ({ onClose, dateRange, filteredTransactions }) => {
     
     const data = {
       totalCashAndBank, 
-      cashAndBankAccounts: cashAndBankAccounts.map(a => ({ name: a.name, amount: a.balance })),
+      cashAndBankAccounts: cashAndBankAccounts.map(a => ({ name: a.name, amount: parseFloat(a.balance || 0) })),
       totalInvestments, 
-      investmentAccounts: investmentAccounts.map(a => ({ name: a.name, amount: a.balance })),
+      investmentAccounts: investmentAccounts.map(a => ({ name: a.name, amount: parseFloat(a.balance || 0) })),
       sumReceivables, 
       receivablesDetail,
       totalAssets,
       totalCCDebt, 
-      creditCardAccounts: creditCardAccounts.map(a => ({ name: a.name, amount: Math.abs(a.balance) })),
+      creditCardAccounts: creditCardAccounts.map(a => ({ name: a.name, amount: Math.abs(parseFloat(a.balance || 0)) })),
       sumPayables, 
       payablesDetail,
       totalLiabilities,
