@@ -9,23 +9,6 @@ const PersonStatement = ({ personData, onClose, onOpenForm }) => {
   useEffect(() => {
     document.body.classList.add('printing-modal');
   
-  const exportToExcel = () => {
-    let csvContent = "\uFEFF";
-    csvContent += "Tarih;Islem;Kategori;Tutar\n";
-    personTransactions.forEach(t => {
-      const d = new Date(t.date).toLocaleDateString('tr-TR');
-      const title = (t.title || '').replace(/;/g, ',');
-      const cat = (t.category || '').replace(/;/g, ',');
-      const amt = t.amount;
-      csvContent += `${d};${title};${cat};${amt}\n`;
-    });
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `KisiEkstresi_${new Date().toLocaleDateString('tr-TR')}.csv`;
-    link.click();
-  };
 
   return () => document.body.classList.remove('printing-modal');
   }, []);
@@ -313,25 +296,6 @@ openPdfTable(`${personData.name} Ekstresi`, personTransactions, totalAmountCalc)
                 else if (t.type === 'debt_payment') { typeLabel = 'Ödeme Yapıldı'; isPositive = true; } // Borcumuzu ödedik (Bakiyesi arttı)
                 else if (t.type === 'expense') { typeLabel = 'Gider'; isPositive = false; } // Normal harcama
                 else if (t.type === 'income') { typeLabel = 'Gelir'; isPositive = true; } // Normal gelir
-
-              
-  const exportToExcel = () => {
-    let csvContent = "\uFEFF";
-    csvContent += "Tarih;Islem;Kategori;Tutar\n";
-    personTransactions.forEach(t => {
-      const d = new Date(t.date).toLocaleDateString('tr-TR');
-      const title = (t.title || '').replace(/;/g, ',');
-      const cat = (t.category || '').replace(/;/g, ',');
-      const amt = t.amount;
-      csvContent += `${d};${title};${cat};${amt}\n`;
-    });
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `KisiEkstresi_${new Date().toLocaleDateString('tr-TR')}.csv`;
-    link.click();
-  };
 
   return (
                   <div key={t.id} className="flex justify-between items-center p-3 rounded-lg border border-[var(--border-color)]" style={{ backgroundColor: 'var(--card-bg)' }}>
