@@ -407,3 +407,189 @@ export const openFinancialPdf = (isDetailed, dateRange, data) => {
   printWindow.document.write(html);
   printWindow.document.close();
 };
+
+export const openDetailedReportPdf = (dateRange, person, category, totalIncome, totalExpense, filteredTxs) => {
+  const printWindow = window.open('', '_blank');
+  const formatMoney = (amount) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount);
+  
+  let tableRows = '';
+  filteredTxs.forEach(t => {
+    const d = new Date(t.date).toLocaleDateString('tr-TR');
+    const typeLabel = t.type === 'expense' ? 'Gider' : t.type === 'income' ? 'Gelir' : t.type === 'transfer' ? 'Transfer' : t.type === 'debt_given' ? 'Borç Verildi' : 'Borç Alındı';
+    
+    let amountStr = '';
+    let amountColor = '#334155';
+    if (t.type === 'expense' || t.type === 'debt_given') {
+      amountStr = '-' + formatMoney(t.amount);
+      amountColor = '#e11d48';
+    } else if (t.type === 'income' || t.type === 'debt_taken') {
+      amountStr = '+' + formatMoney(t.amount);
+      amountColor = '#059669';
+    } else {
+      amountStr = formatMoney(t.amount);
+    }
+
+    tableRows += `
+      <tr>
+        <td class="date-col">${d}</td>
+        <td class="cat-col">${t.category || '-'}</td>
+        <td>${typeLabel}</td>
+        <td>${t.person || '-'}</td>
+        <td>${t.title || '-'}</td>
+        <td style="text-align:right; font-weight:500; color:${amountColor};">${amountStr}</td>
+      </tr>
+    `;
+  });
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="tr">
+    <head>
+      <meta charset="UTF-8">
+      <title>Aile Bütçesi Detaylı Rapor</title>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+      <style>
+        body { 
+          font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+          padding: 30px 40px; 
+          color: #334155; 
+          background-color: #fff;
+          margin: 0;
+        }
+        .header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          border-bottom: 2px solid #0f172a;
+          padding-bottom: 12px;
+          margin-bottom: 24px;
+        }
+        h1 { 
+          color: #0f172a; 
+          margin: 0; 
+          font-size: 22px;
+          font-weight: 600;
+          letter-spacing: -0.5px;
+        }
+        .date { 
+          color: #64748b; 
+          font-size: 12px; 
+          font-weight: 500;
+        }
+        .filters {
+          display: flex;
+          gap: 15px;
+          margin-bottom: 15px;
+          font-size: 12px;
+          color: #475569;
+        }
+        .filters span { font-weight: 600; color: #0f172a; }
+        
+        .totals-box {
+          display: flex;
+          gap: 30px;
+          padding: 15px 20px;
+          background-color: #f8fafc;
+          border-radius: 8px;
+          margin-bottom: 25px;
+          border: 1px solid #e2e8f0;
+        }
+        .totals-box div { font-size: 13px; color: #475569; }
+        .totals-box strong { display: block; font-size: 18px; margin-top: 4px; }
+        .tot-in { color: #059669; }
+        .tot-out { color: #e11d48; }
+
+        table { 
+          width: 100%; 
+          border-collapse: collapse; 
+          font-size: 11.5px; 
+        }
+        th { 
+          text-align: left; 
+          padding: 6px 4px;
+          color: #475569;
+          font-weight: 600;
+          text-transform: uppercase;
+          font-size: 10px;
+          letter-spacing: 0.5px;
+          border-bottom: 1px solid #1e293b;
+        }
+        td { 
+          padding: 5px 4px; 
+          border-bottom: 1px solid #f1f5f9; 
+          color: #1e293b;
+        }
+        tr:last-child td {
+          border-bottom: none;
+        }
+        .date-col { color: #64748b; font-variant-numeric: tabular-nums; }
+        .cat-col { color: #64748b; font-size: 11px; }
+        
+        @media print {
+          @page { margin: 1cm; }
+          body { padding: 0; }
+          .print-btn { display: none !important; }
+        }
+        
+        .print-btn { 
+          position: fixed;
+          top: 20px;
+          right: 30px;
+          background-color: #0f172a; 
+          color: white; 
+          border: none; 
+          padding: 10px 20px; 
+          border-radius: 6px; 
+          cursor: pointer; 
+          font-weight: 500; 
+          font-size: 13px; 
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          transition: all 0.2s;
+        }
+        .print-btn:hover { 
+          background-color: #334155;
+          transform: translateY(-1px);
+        }
+      </style>
+    </head>
+    <body>
+      <button class="print-btn" onclick="window.print()">🖨️ YAZDIR / PDF İNDİR</button>
+      
+      <div class="header">
+        <h1>Aile Bütçesi Detaylı Rapor</h1>
+        <div class="date">Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}</div>
+      </div>
+      
+      <div class="filters">
+        <div>Tarih Aralığı: <span>${dateRange}</span></div>
+        <div>Kişi: <span>${person}</span></div>
+        <div>Kategori: <span>${category}</span></div>
+      </div>
+      
+      <div class="totals-box">
+        <div>Toplam Girdi: <strong class="tot-in">${formatMoney(totalIncome)}</strong></div>
+        <div>Toplam Çıktı: <strong class="tot-out">${formatMoney(totalExpense)}</strong></div>
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th style="width:10%">Tarih</th>
+            <th style="width:15%">Kategori</th>
+            <th style="width:15%">İşlem Türü</th>
+            <th style="width:15%">Kişi</th>
+            <th style="width:30%">Açıklama</th>
+            <th style="width:15%; text-align:right;">Tutar</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRows}
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `;
+
+  printWindow.document.write(html);
+  printWindow.document.close();
+};

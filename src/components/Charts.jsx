@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { openDetailedReportPdf } from '../utils/pdfExport';
 import { useBudget } from '../context/BudgetContext';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Share2, Filter, SearchX, FileText, FileBarChart, ShoppingBag, Coffee, Home, Zap, Heart, Book, Film, MoreHorizontal, Briefcase, TrendingUp, DollarSign, Trash2, Edit2, ArrowRightLeft, HandCoins } from 'lucide-react';
@@ -106,9 +107,7 @@ const Charts = ({ onOpenForm }) => {
     link.click();
   };
 
-  const exportToPDF = () => {
-    window.print();
-  };
+  const exportToPDF = () => { openDetailedReportPdf(dateRange, person, category, totalIncome, totalExpense, filteredTxs); };
 
   const handleOpenStatement = () => {
     if (person !== 'Tümü') {
