@@ -237,6 +237,71 @@ const Dashboard = ({ onEditTransaction }) => {
     if (activeWidget === 'inv') { title = 'Yatırım ve Birikimler'; listData = invAccounts; isAccountList = true; }
     if (activeWidget === 'receivables') { title = 'Alacaklarım'; listData = activeDebts.filter(d => d.netAmount > 0); }
     if (activeWidget === 'debts') { title = 'Borçlarım'; listData = activeDebts.filter(d => d.netAmount < 0); }
+    const exportWidgetData = (type, title, listData, isAccountList) => {
+      let exportData = [];
+      if (isAccountList) {
+        exportData = listData.map(acc => ({
+          'Hesap Adı': acc.name,
+          'Bakiye (TL)': acc.balance
+        }));
+      } else {
+        exportData = listData.map(d => ({
+          'Kişi': d.person,
+          'Bakiye (TL)': d.netAmount,
+          'Döviz/Altın': Object.keys(d.assets)
+            .filter(a => a !== 'TL' && Math.abs(d.assets[a]) > 0.001)
+            .map(a => `${d.assets[a]} ${a}`)
+            .join(', ') || 'Yok'
+        }));
+      }
+
+      if (type === 'excel') {
+        const headers = isAccountList ? ['Hesap Adı', 'Bakiye (TL)'] : ['Kişi', 'Bakiye (TL)', 'Döviz/Altın'];
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF" + headers.join(',') + "\n";
+        exportData.forEach(row => {
+          csvContent += Object.values(row).map(v => `"${v}"`).join(',') + "\n";
+        });
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `${title}_Ozet.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else if (type === 'pdf') {
+        const printWindow = window.open('', '_blank');
+        let tableRows = '';
+        exportData.forEach(row => {
+          tableRows += `<tr>${Object.values(row).map(v => `<td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${v}</td>`).join('')}</tr>`;
+        });
+        const headersHtml = (isAccountList ? ['Hesap Adı', 'Bakiye (TL)'] : ['Kişi', 'Bakiye (TL)', 'Döviz/Altın']).map(h => `<th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: left;">${h}</th>`).join('');
+        
+        const html = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>${title}</title>
+            <style>
+              body { font-family: sans-serif; padding: 20px; color: #334155; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left; }
+              .print-btn { padding: 10px 20px; background: #0f172a; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; margin-bottom: 20px; }
+              @media print { .print-btn { display: none; } }
+            </style>
+          </head>
+          <body>
+            <button class="print-btn" onclick="window.print()">Yazdır / PDF Olarak Kaydet</button>
+            <h2 style="margin-top: 20px;">${title}</h2>
+            <table>
+              <thead><tr>${headersHtml}</tr></thead>
+              <tbody>${tableRows}</tbody>
+            </table>
+          </body>
+          </html>
+        `;
+        printWindow.document.write(html);
+        printWindow.document.close();
+      }
+    };
 
     return (
       <div className="modal-overlay" onClick={() => setActiveWidget(null)} style={{ zIndex: 100 }}>
