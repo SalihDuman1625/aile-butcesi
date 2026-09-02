@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useBudget } from '../context/BudgetContext';
-import { TrendingDown, ShoppingBag, Coffee, Home, Zap, Heart, Book, Film, MoreHorizontal, Briefcase, TrendingUp, DollarSign, AlertCircle, CheckCircle2, Trash2, Edit2, ArrowRightLeft, HandCoins, Building, CreditCard, Coins, X, Landmark, Handshake } from 'lucide-react';
+import { FileDown, FileText, Download, TrendingDown, ShoppingBag, Coffee, Home, Zap, Heart, Book, Film, MoreHorizontal, Briefcase, TrendingUp, DollarSign, AlertCircle, CheckCircle2, Trash2, Edit2, ArrowRightLeft, HandCoins, Building, CreditCard, Coins, X, Landmark, Handshake } from 'lucide-react';
 import PayBillModal from './PayBillModal';
 import AccountStatement from './AccountStatement';
 import IncomeExpenseStatement from './IncomeExpenseStatement';
 import PersonStatement from './PersonStatement';
+
 
 const getCategoryIcon = (category, type) => {
   if (type === 'transfer') return <ArrowRightLeft size={20} />;
@@ -235,7 +236,7 @@ const Dashboard = ({ onEditTransaction }) => {
     if (activeWidget === 'cc') { title = 'Kredi Kartları'; listData = ccAccounts; isAccountList = true; }
     if (activeWidget === 'inv') { title = 'Yatırım ve Birikimler'; listData = invAccounts; isAccountList = true; }
     if (activeWidget === 'receivables') { title = 'Alacaklarım'; listData = activeDebts.filter(d => d.netAmount > 0); }
-    if (activeWidget === 'debts') { title = 'Borğlarım'; listData = activeDebts.filter(d => d.netAmount < 0); }
+    if (activeWidget === 'debts') { title = 'Borçlarım'; listData = activeDebts.filter(d => d.netAmount < 0); }
 
     return (
       <div className="modal-overlay" onClick={() => setActiveWidget(null)} style={{ zIndex: 100 }}>
