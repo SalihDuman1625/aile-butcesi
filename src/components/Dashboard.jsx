@@ -237,30 +237,65 @@ const Dashboard = ({ onEditTransaction }) => {
     if (activeWidget === 'inv') { title = 'Yatırım ve Birikimler'; listData = invAccounts; isAccountList = true; }
     if (activeWidget === 'receivables') { title = 'Alacaklarım'; listData = activeDebts.filter(d => d.netAmount > 0); }
     if (activeWidget === 'debts') { title = 'Borçlarım'; listData = activeDebts.filter(d => d.netAmount < 0); }
-    const exportWidgetData = (type, title, listData, isAccountList) => {
+        const exportWidgetData = (type, title, listData, isAccountList) => {
+      const formatMoney = (amount) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount);
+      const formatNum = (amount) => new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
+
       let exportData = [];
+      let totalTL = 0;
+      let totalAssets = {};
+
       if (isAccountList) {
+        listData.forEach(acc => { totalTL += acc.balance || 0; });
         exportData = listData.map(acc => ({
           'Hesap Adı': acc.name,
           'Bakiye (TL)': acc.balance
         }));
       } else {
+        listData.forEach(d => {
+          totalTL += d.netAmount || 0;
+          if (d.assets) {
+            Object.keys(d.assets).forEach(a => {
+              if (a !== 'TL' && Math.abs(d.assets[a]) > 0.001) {
+                totalAssets[a] = (totalAssets[a] || 0) + d.assets[a];
+              }
+            });
+          }
+        });
         exportData = listData.map(d => ({
           'Kişi': d.person,
           'Bakiye (TL)': d.netAmount,
           'Döviz/Altın': Object.keys(d.assets)
             .filter(a => a !== 'TL' && Math.abs(d.assets[a]) > 0.001)
-            .map(a => `${d.assets[a]} ${a}`)
+            .map(a => `${formatNum(d.assets[a])} ${a}`)
             .join(', ') || 'Yok'
         }));
       }
+      
+      const totalAssetsStr = Object.keys(totalAssets).length > 0 
+        ? Object.keys(totalAssets).map(a => `${formatNum(totalAssets[a])} ${a}`).join(', ') 
+        : (isAccountList ? '' : 'Yok');
 
       if (type === 'excel') {
         const headers = isAccountList ? ['Hesap Adı', 'Bakiye (TL)'] : ['Kişi', 'Bakiye (TL)', 'Döviz/Altın'];
-        let csvContent = "data:text/csv;charset=utf-8,\uFEFF" + headers.join(',') + "\n";
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF" + headers.join(';') + "\n";
+        
         exportData.forEach(row => {
-          csvContent += Object.values(row).map(v => `"${v}"`).join(',') + "\n";
+          csvContent += Object.values(row).map(v => {
+            if (typeof v === 'number') {
+              return `"${v.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}"`;
+            }
+            return `"${v}"`;
+          }).join(';') + "\n";
         });
+        
+        // Add Totals Row
+        if (isAccountList) {
+          csvContent += `"TOPLAM";"${totalTL.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}"\n`;
+        } else {
+          csvContent += `"TOPLAM";"${totalTL.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}";"${totalAssetsStr}"\n`;
+        }
+        
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
@@ -272,28 +307,78 @@ const Dashboard = ({ onEditTransaction }) => {
         const printWindow = window.open('', '_blank');
         let tableRows = '';
         exportData.forEach(row => {
-          tableRows += `<tr>${Object.values(row).map(v => `<td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${v}</td>`).join('')}</tr>`;
+          let rowHtml = '';
+          const rowVals = Object.values(row);
+          rowVals.forEach((v, idx) => {
+            const isNumberCol = idx === 1;
+            const formattedVal = isNumberCol ? formatMoney(v) : v;
+            const align = isNumberCol ? 'right' : 'left';
+            rowHtml += `<td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; text-align: ${align}; color: #334155; font-size: 13px;">${formattedVal}</td>`;
+          });
+          tableRows += `<tr>${rowHtml}</tr>`;
         });
-        const headersHtml = (isAccountList ? ['Hesap Adı', 'Bakiye (TL)'] : ['Kişi', 'Bakiye (TL)', 'Döviz/Altın']).map(h => `<th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: left;">${h}</th>`).join('');
+        
+        // Add Totals Row HTML
+        let totalsRowHtml = '';
+        if (isAccountList) {
+          totalsRowHtml = `
+            <tr style="background-color: #f8fafc; font-weight: 600;">
+              <td style="padding: 12px 16px; border-bottom: 2px solid #cbd5e1; text-align: left; color: #0f172a; font-size: 13px;">TOPLAM</td>
+              <td style="padding: 12px 16px; border-bottom: 2px solid #cbd5e1; text-align: right; color: #0f172a; font-size: 13px;">${formatMoney(totalTL)}</td>
+            </tr>
+          `;
+        } else {
+          totalsRowHtml = `
+            <tr style="background-color: #f8fafc; font-weight: 600;">
+              <td style="padding: 12px 16px; border-bottom: 2px solid #cbd5e1; text-align: left; color: #0f172a; font-size: 13px;">TOPLAM</td>
+              <td style="padding: 12px 16px; border-bottom: 2px solid #cbd5e1; text-align: right; color: #0f172a; font-size: 13px;">${formatMoney(totalTL)}</td>
+              <td style="padding: 12px 16px; border-bottom: 2px solid #cbd5e1; text-align: left; color: #0f172a; font-size: 13px;">${totalAssetsStr}</td>
+            </tr>
+          `;
+        }
+        
+        const headers = isAccountList ? ['Hesap Adı', 'Bakiye (TL)'] : ['Kişi', 'Bakiye (TL)', 'Döviz/Altın'];
+        const headersHtml = headers.map((h, idx) => {
+            const align = idx === 1 ? 'right' : 'left';
+            return `<th style="padding: 12px 16px; border-bottom: 2px solid #e2e8f0; text-align: ${align}; color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">${h}</th>`;
+        }).join('');
         
         const html = `
           <!DOCTYPE html>
-          <html>
+          <html lang="tr">
           <head>
+            <meta charset="UTF-8">
             <title>${title}</title>
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
             <style>
-              body { font-family: sans-serif; padding: 20px; color: #334155; }
-              table { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left; }
-              .print-btn { padding: 10px 20px; background: #0f172a; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; margin-bottom: 20px; }
-              @media print { .print-btn { display: none; } }
+              body { font-family: 'Inter', system-ui, sans-serif; padding: 40px; color: #0f172a; background-color: #fff; margin: 0; }
+              .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #0f172a; padding-bottom: 16px; margin-bottom: 32px; }
+              h1 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.5px; color: #0f172a; }
+              .date { color: #64748b; font-size: 13px; font-weight: 500; }
+              table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+              tbody tr:nth-child(even) { background-color: #f8fafc; }
+              .print-btn { position: fixed; top: 20px; right: 30px; padding: 10px 20px; background: #0f172a; color: white; border: none; cursor: pointer; border-radius: 6px; font-weight: 500; font-size: 13px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); transition: all 0.2s; z-index: 100; }
+              .print-btn:hover { background-color: #334155; transform: translateY(-1px); }
+              @media print { 
+                @page { margin: 1cm; }
+                body { padding: 0; }
+                .print-btn { display: none !important; } 
+                table { border: 1px solid #e2e8f0; }
+              }
             </style>
           </head>
           <body>
-            <button class="print-btn" onclick="window.print()">Yazdır / PDF Olarak Kaydet</button>
-            <h2 style="margin-top: 20px;">${title}</h2>
+            <button class="print-btn" onclick="window.print()">🖨️ YAZDIR / PDF İNDİR</button>
+            <div class="header">
+              <h1>${title} Detayı</h1>
+              <div class="date">Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}</div>
+            </div>
             <table>
               <thead><tr>${headersHtml}</tr></thead>
-              <tbody>${tableRows}</tbody>
+              <tbody>
+                ${tableRows}
+                ${totalsRowHtml}
+              </tbody>
             </table>
           </body>
           </html>
