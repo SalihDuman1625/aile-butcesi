@@ -379,9 +379,7 @@ export const BudgetProvider = ({ children }) => {
     });
   };
 
-  const getFilteredTransactions,
-    exchangeRates,
-    updateExchangeRate = ({ dateRange, category, person, type, startDate, endDate }) => {
+  const getFilteredTransactions = ({ dateRange, category, person, type, startDate, endDate }) => {
     return transactions.filter(t => {
       if (category && category !== 'Tümü' && category !== 'TǬmǬ' && t.category !== category) return false;
       if (person && person !== 'Tümü' && person !== 'TǬmǬ' && t.person !== person) return false;
