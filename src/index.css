@@ -196,10 +196,10 @@ body {
 
 /* FAB */
 .fab {
-  position: absolute;
-  top: -28px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: fixed;
+  bottom: 85px;
+  right: 20px;
+  transform: none;
   background: var(--primary-color);
   color: white;
   width: 58px;

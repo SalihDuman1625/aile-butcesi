@@ -22,8 +22,7 @@ const BottomNav = ({ activeTab, setActiveTab, onOpenForm }) => {
         <span>Hesaplar</span>
       </button>
       
-      {/* Orta Boşluk (FAB için yer tutucu) */}
-      <div style={{ width: '64px', flexShrink: 0 }}></div>
+      
       
       <button 
         onClick={onOpenForm}
