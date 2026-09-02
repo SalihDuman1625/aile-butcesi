@@ -243,9 +243,17 @@ const Dashboard = ({ onEditTransaction }) => {
         <div className="modal-content" onClick={e => e.stopPropagation()}>
           <div className="flex justify-between items-center mb-4 pb-2 border-b border-[var(--border-color)]">
             <h2 className="text-xl font-bold text-main">{title}</h2>
-            <button onClick={() => setActiveWidget(null)} className="p-1 text-muted hover:text-main rounded-full bg-gray-100">
-              <X size={20} />
-            </button>
+              <div className="flex items-center gap-2">
+                <button onClick={(e) => { e.stopPropagation(); exportWidgetData('excel', title, listData, isAccountList); }} className="p-1 text-green-600 hover:bg-green-50 rounded" title="Excel İndir">
+                  <FileDown size={20} />
+                </button>
+                <button onClick={(e) => { e.stopPropagation(); exportWidgetData('pdf', title, listData, isAccountList); }} className="p-1 text-red-500 hover:bg-red-50 rounded" title="PDF İndir">
+                  <FileText size={20} />
+                </button>
+                <button onClick={() => setActiveWidget(null)} className="p-1 text-muted hover:text-main rounded-full bg-gray-100 ml-2">
+                  <X size={20} />
+                </button>
+              </div>
           </div>
 
           <div className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
