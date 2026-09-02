@@ -33,6 +33,9 @@ const Dashboard = ({ onEditTransaction }) => {
   const forecast = getForecastForNextMonth();
   const activeDebts = getDebts();
 
+  const [showAssetDetails, setShowAssetDetails] = useState(false);
+  const [showLiabilityDetails, setShowLiabilityDetails] = useState(false);
+
   const [billToPay, setBillToPay] = useState(null);
   
   // Widget Detail State
@@ -320,7 +323,10 @@ const Dashboard = ({ onEditTransaction }) => {
           </div>
           
           <div className="flex items-center justify-between w-full mt-1 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-            <div className="flex flex-col">
+            <div 
+              className="flex flex-col cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-colors -ml-2"
+              onClick={() => { setShowAssetDetails(!showAssetDetails); setShowLiabilityDetails(false); }}
+            >
               <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)' }}>Toplam Varlık</span>
               <span className="font-semibold text-success" style={{ fontSize: '1rem' }}>+{formatMoney(totalCashAndBank + totalInvestments + (typeof sumReceivables !== 'undefined' ? sumReceivables : 0))}</span>
             </div>
@@ -329,11 +335,48 @@ const Dashboard = ({ onEditTransaction }) => {
               -
             </div>
             
-            <div className="flex flex-col items-end">
+            <div 
+              className="flex flex-col items-end cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-colors -mr-2"
+              onClick={() => { setShowLiabilityDetails(!showLiabilityDetails); setShowAssetDetails(false); }}
+            >
               <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)' }}>Toplam Yükümlülük</span>
               <span className="font-semibold text-danger" style={{ fontSize: '1rem' }}>-{formatMoney(Math.abs(totalCCDebt) + (typeof sumPayables !== 'undefined' ? sumPayables : 0))}</span>
             </div>
           </div>
+
+          {(showAssetDetails || showLiabilityDetails) && (
+            <div className="mt-4 pt-4 border-t border-white/10 text-sm animate-in fade-in slide-in-from-top-2 duration-200">
+              {showAssetDetails && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-white/80">
+                    <span>Kasa ve Bankalar:</span>
+                    <span className="font-mono">{formatMoney(totalCashAndBank)} ₺</span>
+                  </div>
+                  <div className="flex justify-between text-white/80">
+                    <span>Yatırımlar (Altın, Döviz):</span>
+                    <span className="font-mono">{formatMoney(totalInvestments)} ₺</span>
+                  </div>
+                  <div className="flex justify-between text-white/80">
+                    <span>Kişilerden Alacaklar:</span>
+                    <span className="font-mono">{formatMoney(typeof sumReceivables !== 'undefined' ? sumReceivables : 0)} ₺</span>
+                  </div>
+                </div>
+              )}
+              
+              {showLiabilityDetails && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-white/80">
+                    <span>Kredi Kartı Borçları:</span>
+                    <span className="font-mono">{formatMoney(Math.abs(totalCCDebt))} ₺</span>
+                  </div>
+                  <div className="flex justify-between text-white/80">
+                    <span>Kişilere Borçlar:</span>
+                    <span className="font-mono">{formatMoney(typeof sumPayables !== 'undefined' ? sumPayables : 0)} ₺</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Small Widgets */}
